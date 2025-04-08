@@ -2238,17 +2238,35 @@ More information about this setting can be found [here](https://docs.sqlalchemy.
 - Default: `False`
 - Description: Enables websocket support in Open WebUI (used with Redis).
 
+:::info
+
+When deploying Open-WebUI in a multiple node/worker cluster with a load balancer, you must use ENABLE_WEBSOCKET_SUPPORT. Without a working connection to a key-value NoSQL database, Open WebUI will be unable to keep track of websockets, which are needed for normal operation.
+
+:::
+
 #### `WEBSOCKET_MANAGER`
 
 - Type: `str`
 - Default: `redis`
 - Description: Specifies the websocket manager to use (in this case, Redis).
 
+:::info
+
+When deploying Open-WebUI in a multiple node/worker cluster with a load balancer, you must use WEBSOCKET_MANAGER. Without a working connection to a key-value NoSQL database, Open WebUI will be unable to keep track of websockets, which are needed for normal operation.
+
+:::
+
 #### `WEBSOCKET_REDIS_URL`
 
 - Type: `str`
 - Default: `${REDIS_URL}`
 - Description: Specifies the URL of the Redis instance for websocket communication. It is distinct from `REDIS_URL` and in practice it is recommend to set both.
+
+:::info
+
+When deploying Open-WebUI in a multiple node/worker cluster with a load balancer, you must ensure that the WEBSOCKET_REDIS_URL value is the same across all instances. Without a working connection to Redis, Open WebUI will be unable to keep track of websockets and sessions, which are needed for normal operation.
+
+:::
 
 #### `WEBSOCKET_SENTINEL_HOSTS`
 
@@ -2266,6 +2284,12 @@ More information about this setting can be found [here](https://docs.sqlalchemy.
 - Type: `str`
 - Example: `redis://localhost:6379/0`
 - Description: Specifies the URL of the Redis instance for app state.
+
+:::info
+
+When deploying Open-WebUI in a multiple node/worker cluster with a load balancer, you must ensure that the REDIS_URL value is the same across all instances. Without a working connection to Redis, Open WebUI will be unable to keep track of sessions or variables, which are needed for normal operation.
+
+:::
 
 #### `REDIS_SENTINEL_HOSTS`
 
