@@ -214,7 +214,9 @@ class Filter:
         if model_id in budgets:
             return int(budgets[model_id])
         # Allow prefix match — "gpt-4o-2024-11-20" uses the "gpt-4o" budget.
-        for key, value in budgets.items():
+        # Sort by key length descending so more specific prefixes win:
+        # "gpt-4o-mini" must match before "gpt-4o".
+        for key, value in sorted(budgets.items(), key=lambda kv: -len(kv[0])):
             if model_id.startswith(key):
                 return int(value)
         return self.valves.default_budget_tokens
@@ -253,11 +255,12 @@ class Filter:
         system_msgs = [m for m in messages if m.get("role") == "system"]
         other_msgs = [m for m in messages if m.get("role") != "system"]
 
-        used = sum(self._message_tokens(m) for m in system_msgs)
-        used += sum(self._message_tokens(m) for m in other_msgs)
+        used = sum(self._message_tokens(m) for m in system_msgs + other_msgs)
 
         # Drop oldest non-system messages one at a time until we're under budget
-        # or nothing is left to drop.
+        # or nothing is left to drop. System messages stay put; if they alone
+        # already exceed the budget, the provider will reject the request and
+        # that's the right signal (the admin needs to shrink the system prompt).
         while used > budget and other_msgs:
             dropped = other_msgs.pop(0)
             used -= self._message_tokens(dropped)
@@ -273,12 +276,22 @@ class Filter:
 A few things worth noticing:
 
 - **Configure once, run everywhere.** Set this filter as a **global** filter in Admin Panel → Functions. The `model_budgets_json` valve lets you enumerate every model you care about; anything else falls back to `default_budget_tokens`. Admins can tune budgets at runtime without touching code.
-- **Prefix match on model id.** `gpt-4o-2024-11-20` transparently uses the `gpt-4o` budget. Useful because providers version model ids constantly.
-- **Multimodal-aware estimator.** Handles the list-of-parts shape some providers use, so it doesn't silently under-count image + text messages.
+- **Prefix match on model id, longest-first.** `gpt-4o-2024-11-20` transparently uses the `gpt-4o` budget, and `gpt-4o-mini-2024-07-18` correctly uses the `gpt-4o-mini` budget (more specific wins). The `_budget_for` helper sorts keys by length descending before the prefix loop — otherwise dict insertion order would decide, and `"gpt-4o"` would shadow `"gpt-4o-mini"` for anyone who listed it first.
+- **Multimodal content is partially counted.** The estimator walks list-of-parts content and sums text parts. **Image / audio / file parts count as zero.** For a char/4 heuristic that's fine for a trim budget, but if you rely heavily on image inputs with small providers (e.g. a local 8k vision model), add a per-image allowance inside `_estimate_tokens` (something like 255 tokens per image is a reasonable start).
 - **Same tool-call repair.** Reused from the first example. This is the block that keeps the request valid after trimming.
 - **Fail-open when misconfigured.** If you somehow set the headroom larger than the budget, the filter passes the request through untouched rather than wiping the conversation. The provider's error is better than a silent delete.
 
-If you need higher-fidelity token counting, swap `_estimate_tokens` for `tiktoken.encoding_for_model(model_id).encode(text)` (OpenAI-family) or your provider's own tokenizer. For everything else — Anthropic, Gemini, local models — the char/4 heuristic is close enough to keep you safely under the limit.
+:::warning Check your model ids
+Open WebUI doesn't always present the raw provider id to `body["model"]`. If an admin sets a connection `prefix_id`, every model is wrapped as `{prefix}.{raw_id}` (e.g. `openai.gpt-4o`). Pipe-function manifolds wrap their sub-models as `{pipe.id}.{sub_id}` (e.g. `anthropic.claude-3-5-sonnet-20241022`). Custom Workspace models can have arbitrary ids, often UUIDs.
+
+**Copy the exact id shown in the model picker** into `model_budgets_json` — not the upstream provider's id. If you get the format wrong, requests silently land on `default_budget_tokens` and you won't notice until a chat that fits a real budget fails to fit the fallback.
+:::
+
+:::warning RAG and native-tool definitions are added AFTER this filter
+This filter runs in `inlet()`, which is before Open WebUI's RAG retrieval (`chat_completion_files_handler`) and before native-tool definitions are attached to the payload. Both can add non-trivial bytes to the request **after** the filter has trimmed. If you rely on Knowledge bases or if your models have heavy built-in tool specs (web search + memory + code interpreter + MCP servers + …), **reserve extra headroom** by bumping `response_headroom_tokens` — it doubles as a general "leave room for post-filter additions" budget.
+:::
+
+If you need higher-fidelity token counting, swap `_estimate_tokens` for `tiktoken.encoding_for_model(model_id).encode(text)` (OpenAI-family) or your provider's own tokenizer. For everything else — Anthropic, Gemini, local models — the char/4 heuristic is close enough to keep you safely under the limit, *as long as you've left enough headroom for the RAG / tool additions above*.
 
 ## What users will experience
 
