@@ -125,22 +125,150 @@ Enable this filter globally or attach it to specific models in **Admin Panel →
 With tool calling on, an `assistant` message that invokes tools is paired with one or more `tool` messages carrying results that share the same `tool_call_id`. If `max_turns` happens to slice the conversation in the middle of that pair — keeping the orphan half — the upstream provider returns a 400 because the tool call / result structure is invalid. The repair block drops the orphans so the window always starts on a clean boundary. This matches what production community filters for context management do; the rest of the filter is the generic trimming logic.
 :::
 
-### Rough token-budget sketch
+### Slightly more involved: per-model token budget
 
-A token-based trimmer follows the same shape. You need an estimator and a per-model budget:
+Counting turns is easy to reason about but wrong in practice — 40 turns of one-liners fit in 8k tokens, five turns with a 200-page PDF attachment do not. The more useful policy is "keep everything until we're about to bust the model's context window, then drop the oldest non-system messages until we fit."
+
+This second example does that. It:
+
+- Estimates tokens from character length (cheap heuristic, no dependencies; swap in `tiktoken` or a real tokenizer if you want strict counts).
+- Reads per-model budgets from a valve, so a single instance of the filter works for your 8k local model and your 1M Gemini at the same time.
+- Leaves a configurable headroom for the response.
+- Re-applies the tool-call repair from the first example after trimming.
 
 ```python
-def estimate_tokens(text: str) -> int:
-    # Cheap heuristic that works reasonably across providers.
-    # For stricter counting, use tiktoken (OpenAI) or the provider's tokenizer.
-    return max(1, len(text) // 4)
+import json
+from pydantic import BaseModel, Field
 
 
-def total_tokens(messages: list[dict]) -> int:
-    return sum(estimate_tokens(m.get("content", "") or "") for m in messages)
+class Filter:
+    class Valves(BaseModel):
+        priority: int = Field(
+            default=0,
+            description="Run before other filters that depend on the final message list.",
+        )
+        default_budget_tokens: int = Field(
+            default=8000,
+            description="Fallback input-token budget for any model not listed in model_budgets.",
+        )
+        response_headroom_tokens: int = Field(
+            default=2000,
+            description="Tokens to reserve for the model's reply. Trimmed from the budget before fitting.",
+        )
+        model_budgets_json: str = Field(
+            default=(
+                '{\n'
+                '  "gpt-4o": 120000,\n'
+                '  "gpt-4o-mini": 120000,\n'
+                '  "claude-3-5-sonnet": 180000,\n'
+                '  "gemini-1.5-pro": 900000,\n'
+                '  "llama3.1:8b": 6000\n'
+                '}'
+            ),
+            description="JSON mapping of model id (or prefix) to input-token budget.",
+        )
+
+    def __init__(self):
+        self.valves = self.Valves()
+
+    # ---- helpers -----------------------------------------------------------
+
+    @staticmethod
+    def _estimate_tokens(content) -> int:
+        """~4 chars per token is close enough for a trim budget.
+        For strict counts, replace with tiktoken or a provider tokenizer."""
+        if content is None:
+            return 0
+        if isinstance(content, str):
+            return max(1, len(content) // 4)
+        # Some providers deliver multimodal content as a list of parts.
+        if isinstance(content, list):
+            return sum(
+                Filter._estimate_tokens(part.get("text", "")) if isinstance(part, dict) else 0
+                for part in content
+            )
+        return 0
+
+    def _message_tokens(self, msg: dict) -> int:
+        # Content + a small per-message overhead for role/formatting.
+        tokens = self._estimate_tokens(msg.get("content"))
+        # Tool calls carry arguments in JSON; count them too.
+        for tc in msg.get("tool_calls") or []:
+            args = tc.get("function", {}).get("arguments", "")
+            tokens += self._estimate_tokens(args)
+        return tokens + 4
+
+    def _budget_for(self, model_id: str) -> int:
+        try:
+            budgets = json.loads(self.valves.model_budgets_json or "{}")
+        except Exception:
+            budgets = {}
+        if model_id in budgets:
+            return int(budgets[model_id])
+        # Allow prefix match — "gpt-4o-2024-11-20" uses the "gpt-4o" budget.
+        for key, value in budgets.items():
+            if model_id.startswith(key):
+                return int(value)
+        return self.valves.default_budget_tokens
+
+    @staticmethod
+    def _repair_tool_calls(other_msgs: list[dict]) -> list[dict]:
+        while other_msgs and other_msgs[0].get("role") == "tool":
+            other_msgs.pop(0)
+        if (
+            other_msgs
+            and other_msgs[0].get("role") == "assistant"
+            and other_msgs[0].get("tool_calls")
+        ):
+            expected = {tc.get("id") for tc in other_msgs[0]["tool_calls"]}
+            seen = {
+                m.get("tool_call_id")
+                for m in other_msgs[1:]
+                if m.get("role") == "tool"
+            }
+            if not expected.issubset(seen):
+                other_msgs.pop(0)
+        return other_msgs
+
+    # ---- inlet -------------------------------------------------------------
+
+    async def inlet(self, body: dict) -> dict:
+        messages = body.get("messages", [])
+        if not messages:
+            return body
+
+        model_id = body.get("model", "") or ""
+        budget = self._budget_for(model_id) - self.valves.response_headroom_tokens
+        if budget <= 0:
+            return body  # Misconfigured — don't mangle the request, let the provider reject.
+
+        system_msgs = [m for m in messages if m.get("role") == "system"]
+        other_msgs = [m for m in messages if m.get("role") != "system"]
+
+        used = sum(self._message_tokens(m) for m in system_msgs)
+        used += sum(self._message_tokens(m) for m in other_msgs)
+
+        # Drop oldest non-system messages one at a time until we're under budget
+        # or nothing is left to drop.
+        while used > budget and other_msgs:
+            dropped = other_msgs.pop(0)
+            used -= self._message_tokens(dropped)
+
+        other_msgs = self._repair_tool_calls(other_msgs)
+
+        body["messages"] = system_msgs + other_msgs
+        return body
 ```
 
-Then in `inlet()`, drop the oldest non-system message until `total_tokens(...)` is below the budget you've set for that model's context window (leaving headroom for the response).
+A few things worth noticing:
+
+- **Configure once, run everywhere.** Set this filter as a **global** filter in Admin Panel → Functions. The `model_budgets_json` valve lets you enumerate every model you care about; anything else falls back to `default_budget_tokens`. Admins can tune budgets at runtime without touching code.
+- **Prefix match on model id.** `gpt-4o-2024-11-20` transparently uses the `gpt-4o` budget. Useful because providers version model ids constantly.
+- **Multimodal-aware estimator.** Handles the list-of-parts shape some providers use, so it doesn't silently under-count image + text messages.
+- **Same tool-call repair.** Reused from the first example. This is the block that keeps the request valid after trimming.
+- **Fail-open when misconfigured.** If you somehow set the headroom larger than the budget, the filter passes the request through untouched rather than wiping the conversation. The provider's error is better than a silent delete.
+
+If you need higher-fidelity token counting, swap `_estimate_tokens` for `tiktoken.encoding_for_model(model_id).encode(text)` (OpenAI-family) or your provider's own tokenizer. For everything else — Anthropic, Gemini, local models — the char/4 heuristic is close enough to keep you safely under the limit.
 
 ## What users will experience
 
