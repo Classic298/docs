@@ -293,6 +293,29 @@ This filter runs in `inlet()`, which is before Open WebUI's RAG retrieval (`chat
 
 If you need higher-fidelity token counting, swap `_estimate_tokens` for `tiktoken.encoding_for_model(model_id).encode(text)` (OpenAI-family) or your provider's own tokenizer. For everything else — Anthropic, Gemini, local models — the char/4 heuristic is close enough to keep you safely under the limit, *as long as you've left enough headroom for the RAG / tool additions above*.
 
+## You almost certainly want a community filter, not this one
+
+The two examples on this page are deliberately minimal — they exist to show the shape of the `inlet()` hook and to teach the one non-obvious detail (tool-call repair). For a real deployment, **don't write your own from scratch** and don't ship these as-is. Go browse the [Open WebUI Community](https://openwebui.com/) and pick a context-management filter someone else has already battle-tested.
+
+Production-grade community filters typically handle things the minimal examples above skip:
+
+- **Real tokenizers per provider** — `tiktoken` for OpenAI, Anthropic's tokenizer for Claude, Gemini's for Google, `transformers` tokenizers for local models. Not char/4 heuristics.
+- **Proper image / audio / file token accounting** — provider-specific allowances for every content-part type, not "zero."
+- **Summarize-and-replace strategies** — when the window is about to overflow, call a cheap model to summarize the oldest block and replace it with one summary message, preserving long-running context instead of silently forgetting.
+- **Per-user / per-role policies** — power users get larger budgets than free users; service accounts get different defaults than humans.
+- **Per-model-family policies** — more intelligent than a prefix match (e.g. recognize all Claude 3.x Sonnet variants via a regex or metadata).
+- **Tool-result-first or attachment-first trimming** — drop the giant scraped web pages and RAG citations from old turns before touching dialogue.
+- **Sliding-window summarization with checkpoints** — keep running summaries stored in `__metadata__` across turns so you don't re-summarize on every request.
+- **Hard message caps and user-facing errors** — refuse a request with a friendly "this chat is too long, please start a new one" event-emitter message instead of silently dropping context.
+- **Observability hooks** — log every trim decision to Langfuse, OpenLit, or your stack of choice so you can audit what the filter actually did.
+- **Configurable valves for everything** — admins tune everything at runtime without touching code.
+
+None of that is hard to do, but all of it together is a week of work if you're starting from one of the minimal examples above. Someone on the community site has almost certainly already done it. **Search first.**
+
+:::tip Really, search first
+When you're shopping for a context-management filter, look for names like *context window*, *trim*, *summarize*, *conversation length*, *token budget*, *history limiter*, and the provider name of the models you use. Sort by popularity on the community site — the top-downloaded filters tend to be the ones that already solved the edge cases you haven't hit yet.
+:::
+
 ## What users will experience
 
 - With a filter in place, old turns are silently removed / summarized / replaced before the request reaches the model. The user keeps chatting as normal. The model simply "forgets" older history according to your policy.
