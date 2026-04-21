@@ -1,0 +1,130 @@
+---
+sidebar_position: 17
+title: "Context Window / Prompt Too Long"
+---
+
+# "The prompt is too long" / Model Context Length Exceeded
+
+## What you're seeing
+
+Errors like:
+
+- `The prompt is too long: 207601, model maximum context length: 202751`
+- `This model's maximum context length is 128000 tokens. However, your messages resulted in …`
+- `Input is too long for the model`
+- `context length exceeded`
+
+These come from the **model provider** (OpenAI, Anthropic, Google, your Ollama server, GLM-4/5.x, etc.), **not from Open WebUI**. The provider counted the tokens of everything you sent and rejected the request because it exceeds the model's context window.
+
+## Why it happens
+
+The "prompt" a model sees is the **entire conversation** — not just the message you just typed. Every time you send a new message, Open WebUI forwards:
+
+- Your system prompt
+- The **full chat history** (every previous user/assistant turn in that conversation)
+- Any **attached files** that are inlined into context (not retrieved via RAG)
+- Any **tool definitions** and prior **tool call results**
+- Any **inlet-injected context** (from filters, RAG, web search, memories, etc.)
+- Your newest user message
+
+As a chat grows, the history grows. Large attachments or long tool-call outputs can eat the entire window in a single turn. Once the sum of all of that exceeds the model's context window, the provider rejects the request.
+
+## Why Open WebUI doesn't auto-truncate for you
+
+Open WebUI intentionally does **not** ship a built-in context trimmer. This is a design choice, not an oversight, and it is unlikely to change. Here's why:
+
+1. **Every model uses a different tokenizer.** The token count for the same text differs between OpenAI (tiktoken), Anthropic, Gemini, GLM, Llama-family, Mistral, Qwen, and so on. A truly correct trimmer would need a per-model tokenizer for every provider in existence. Getting that wrong ships silent data corruption.
+2. **Every model has a different context window.** 8k, 32k, 128k, 200k, 1M — and that's before you factor in reserved output tokens, provider-side overhead, and multimodal content.
+3. **Everyone wants a different truncation policy.** We have seen users ask for all of the following, and all of them are reasonable:
+   - Trim by **token count**.
+   - Trim by **number of messages**.
+   - Trim by **number of conversational turns**.
+   - Trim only **non-system, non-assistant** messages.
+   - Trim **file attachments** first, keep the dialogue.
+   - Trim **tool-call results** first, keep everything else.
+   - Set a **hard ceiling** on chat length (block further messages beyond N turns).
+   - Summarize older messages instead of dropping them, and replace the dropped block with the summary.
+   - Per-model policies (keep 1M tokens for Gemini, 128k for GPT-4, 32k for smaller local models).
+
+There is no single policy that is correct for every deployment, every user, and every model. A built-in implementation would be wrong for most users by definition, and would hide the much better option: give the user the hook and let them pick.
+
+## The supported way: use a filter Function
+
+Context management in Open WebUI is done with [**filter Functions**](/features/extensibility/plugin/functions/filter). `inlet()` runs on every request before the payload is sent to the model — it receives the full `body` (including `body["messages"]`) and can modify it freely. That is the hook you use.
+
+Typical approaches, in increasing order of sophistication:
+
+1. **Hard chat-length cap.** Refuse or error if `len(body["messages"]) > N`. Simple and predictable; no tokenization needed.
+2. **Newest-N-turns window.** Keep the system prompt and only the most recent N user/assistant turns; drop the older ones.
+3. **Token-budget window, per model.** Estimate tokens per message (e.g., with `tiktoken` for OpenAI-family or a char/4 heuristic for others) and trim from the oldest non-system message until the total fits the model's window.
+4. **Summarize-and-replace.** When the window is about to overflow, call a cheap model to summarize the oldest block of messages, then replace that block with a single assistant-authored summary message. Preserves long-running context without busting the window.
+5. **Attachment- or tool-output-first trimming.** Strip large file contents or tool results from old turns before touching the dialogue.
+
+Community filters for most of these already exist on the [Open WebUI community site](https://openwebui.com/functions). Install one, configure its valves, and you're done. If none fits your policy exactly, copy the closest one into the **Functions** admin page and edit it — filters are pure Python and easy to tweak.
+
+### Minimal example: "newest N turns" filter
+
+```python
+from pydantic import BaseModel, Field
+
+
+class Filter:
+    class Valves(BaseModel):
+        priority: int = Field(
+            default=0,
+            description="Run before other filters that depend on the final message list.",
+        )
+        max_turns: int = Field(
+            default=20,
+            description="Maximum number of non-system messages to keep (older are dropped).",
+        )
+
+    def __init__(self):
+        self.valves = self.Valves()
+
+    async def inlet(self, body: dict) -> dict:
+        messages = body.get("messages", [])
+        if not messages:
+            return body
+
+        system_msgs = [m for m in messages if m.get("role") == "system"]
+        other_msgs = [m for m in messages if m.get("role") != "system"]
+
+        if len(other_msgs) > self.valves.max_turns:
+            other_msgs = other_msgs[-self.valves.max_turns :]
+
+        body["messages"] = system_msgs + other_msgs
+        return body
+```
+
+Enable this filter globally or attach it to specific models in **Admin Panel → Functions**. The `max_turns` valve is configurable per-model via the model card, so you can set a smaller window for local 8k models and a larger one for Gemini 1M.
+
+### Rough token-budget sketch
+
+A token-based trimmer follows the same shape. You need an estimator and a per-model budget:
+
+```python
+def estimate_tokens(text: str) -> int:
+    # Cheap heuristic that works reasonably across providers.
+    # For stricter counting, use tiktoken (OpenAI) or the provider's tokenizer.
+    return max(1, len(text) // 4)
+
+
+def total_tokens(messages: list[dict]) -> int:
+    return sum(estimate_tokens(m.get("content", "") or "") for m in messages)
+```
+
+Then in `inlet()`, drop the oldest non-system message until `total_tokens(...)` is below the budget you've set for that model's context window (leaving headroom for the response).
+
+## What users will experience
+
+- With a filter in place, old turns are silently removed / summarized / replaced before the request reaches the model. The user keeps chatting as normal. The model simply "forgets" older history according to your policy.
+- Without a filter, long conversations will eventually hit the provider's context limit and return the "prompt is too long" error. Users will need to start a new chat.
+
+Both are valid UX choices. Pick the one that matches your deployment.
+
+## Related
+
+- [Filter Functions](/features/extensibility/plugin/functions/filter) — the full reference for `inlet()` / `stream()` / `outlet()`
+- [Community Functions](https://openwebui.com/functions) — browse and install community-built filters, including context-management ones
+- [Chat Parameters](/features/chat-conversations/chat-features/chat-params) — per-chat, per-user, and per-model parameter precedence
