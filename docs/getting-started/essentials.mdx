@@ -7,7 +7,7 @@ title: "Essentials for New Users"
 
 So you've installed Open WebUI, connected a provider, and had your first conversation. Now what?
 
-This page walks through the handful of things that make the difference between *"a chat UI"* and *"a setup that actually works well day-to-day."* Nothing here is required — you can ignore it and keep chatting — but if you've ever wondered "can Open WebUI do X?" the answer is almost certainly **yes, with one of these five pieces**.
+This page walks through the handful of things that make the difference between *"a chat UI"* and *"a setup that actually works well day-to-day."* Nothing here is required — you can ignore it and keep chatting — but if you've ever wondered "can Open WebUI do X?" the answer is almost certainly **yes, with one of these pieces**.
 
 Work through in order, or jump to the part that matches your question:
 
@@ -15,7 +15,7 @@ Work through in order, or jump to the part that matches your question:
 2. [**Context management** — why long chats eventually error out](#-context-management-why-long-chats-break)
 3. [**Task models** — the invisible model that writes your chat titles](#-task-models-the-invisible-model-behind-the-ui)
 4. [**Basic RAG** — chatting with your own documents](#-basic-rag-chatting-with-your-own-documents)
-5. [**Tool calling** — letting the model do things, not just talk](#-tool-calling-letting-the-model-do-things)
+5. [**Tool calling** — letting the model do things, not just talk](#-tool-calling-letting-the-model-do-things) (including **Open Terminal** — giving the model a real shell)
 
 ---
 
@@ -144,9 +144,16 @@ Tools show up in the `+` menu in the chat input. Enable the ones you want for a 
 
 For image generation, there's a first-party integration (**Admin → Settings → Images** with ComfyUI, Automatic1111, OpenAI, or Gemini) rather than a tool — same idea, different plumbing.
 
+### 3. (Advanced) Give the model a real computer with Open Terminal
+
+If "run Python" is too restrictive and you want the model to actually work on your machine — clone repos, install packages, run test suites, spin up a local preview of a website, iterate on a data report against a real CSV — that's [**Open Terminal**](/features/open-terminal). It connects a real shell (sandboxed in a Docker container by default, or bare-metal if you want) as a tool the model can call the same way it calls any other tool. In-chat file browser, live web previews, and skill definitions are included.
+
+This is the biggest "aha" feature once you get past basic chat. It turns Open WebUI from a chat UI into a place where the model actually builds things for you. If Native Mode is on and you've given the model a capable terminal, ask it to build you a small app or run an analysis on a folder of files and watch it go.
+
 More detail:
 - [Tools reference](/features/extensibility/plugin/tools)
 - [Tool-calling modes (Default vs Native)](/features/extensibility/plugin/tools#tool-calling-modes-default-vs-native)
+- [Open Terminal — give your AI a real computer](/features/open-terminal)
 
 ---
 
