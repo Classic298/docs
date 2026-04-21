@@ -33,9 +33,9 @@ There are two plugin families, and the name of the family tells you what it does
 | **Functions — Filters** | Modify every request and/or response as it passes through | Same, on every chat turn | Context trimming, PII scrubbing, token / cost counting, Langfuse tracing, response reformatting |
 | **Functions — Actions** | Add a button under each message that runs custom code | Same, when the user clicks | "Regenerate follow-ups", "Translate reply", "Pin message", "Save to Knowledge" |
 
-**How you install them:** the [Open WebUI Community site](https://openwebui.com/) hosts the one-click catalog — pick one, click "Get", paste into **Admin Panel → Functions** (or **Tools**), flip it on, and configure its **valves** (the plugin's settings).
+**How you install them:** the [**Open WebUI Community site**](https://openwebui.com/) hosts the one-click catalog — pick one, click "Get", paste into **Admin Panel → Functions** (or **Tools**), flip it on, and configure its **valves** (the plugin's settings).
 
-**When to install one:** when you think "it would be nice if Open WebUI did X." It almost certainly already does — via a plugin. Before writing your own, search the community site. Even if nothing matches exactly, the closest hit is usually ~20 lines from what you want.
+**When to install one:** when you think "it would be nice if Open WebUI did X." It almost certainly already does — via a plugin. **Always browse the community site first** — there are thousands of Tools, Filters, Actions, and Pipes already written, and the one you need is usually already there. Even if nothing matches exactly, the closest hit is usually ~20 lines off from what you want and you can fork it from the admin panel.
 
 Reference reading:
 - [Plugin overview](/features/extensibility)
@@ -129,11 +129,18 @@ Tools from the [community site](https://openwebui.com/) are for everything *not*
 - **Database / API tools** — expose a read-only SQL query tool against your own database, or a tool that hits your internal API — the model starts answering questions grounded in your real data.
 - **Domain tools** — weather, stocks, time, crypto prices, shipping-tracking, recipe APIs, whatever matches your work.
 
-Tools show up in the `+` menu in the chat input. Enable the ones you want for a given chat; the model only sees the tools you've enabled. There are thousands more on the community site — browse by category and install whatever matches how you actually use Open WebUI.
+Tools show up in the `+` menu in the chat input. Enable the ones you want for a given chat; the model only sees the tools you've enabled.
+
+:::tip Seriously — browse the community site
+The list above is a *tiny* sample of what's out there. The [**Open WebUI Community**](https://openwebui.com/) has **thousands** of community-built Tools, Filters, Actions, and Pipes covering use cases nobody on the core team would have thought of. Before you write anything yourself, **browse the community site** — sort by popularity, filter by category, and skim a few pages. You'll almost always find something that does exactly what you need, or is two lines off. One-click install, configure the valves, done.
+
+This is the single biggest reason to treat Open WebUI as a platform rather than an app. The community is the feature set.
+:::
 
 More detail:
 - [Tools reference](/features/extensibility/plugin/tools)
 - [Tool-calling modes (Default vs Native)](/features/extensibility/plugin/tools#tool-calling-modes-default-vs-native)
+- [Open WebUI Community — Tools, Functions, Models](https://openwebui.com/)
 
 ---
 
