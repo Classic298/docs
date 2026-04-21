@@ -93,11 +93,37 @@ class Filter:
         if len(other_msgs) > self.valves.max_turns:
             other_msgs = other_msgs[-self.valves.max_turns :]
 
+            # Tool-call repair: after slicing, the new leading messages
+            # might be orphaned tool-call results or an assistant whose
+            # tool_calls reference tool messages that got dropped.
+            # Providers (OpenAI / Anthropic / …) 400 on those — so prune
+            # until the window starts on something the provider accepts.
+            while other_msgs and other_msgs[0].get("role") == "tool":
+                other_msgs.pop(0)
+
+            if (
+                other_msgs
+                and other_msgs[0].get("role") == "assistant"
+                and other_msgs[0].get("tool_calls")
+            ):
+                expected = {tc.get("id") for tc in other_msgs[0]["tool_calls"]}
+                seen = {
+                    m.get("tool_call_id")
+                    for m in other_msgs[1:]
+                    if m.get("role") == "tool"
+                }
+                if not expected.issubset(seen):
+                    other_msgs.pop(0)
+
         body["messages"] = system_msgs + other_msgs
         return body
 ```
 
 Enable this filter globally or attach it to specific models in **Admin Panel → Functions**. The `max_turns` valve is configurable per-model via the model card, so you can set a smaller window for local 8k models and a larger one for Gemini 1M.
+
+:::info Why the tool-call repair block?
+With tool calling on, an `assistant` message that invokes tools is paired with one or more `tool` messages carrying results that share the same `tool_call_id`. If `max_turns` happens to slice the conversation in the middle of that pair — keeping the orphan half — the upstream provider returns a 400 because the tool call / result structure is invalid. The repair block drops the orphans so the window always starts on a clean boundary. This matches what production community filters for context management do; the rest of the filter is the generic trimming logic.
+:::
 
 ### Rough token-budget sketch
 
