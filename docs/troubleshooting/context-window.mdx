@@ -64,6 +64,9 @@ Community filters for most of these already exist on the [Open WebUI community s
 
 ### Minimal example: "newest N turns" filter
 
+<details>
+<summary>Show the full filter code (keeps the last N non-system messages)</summary>
+
 ```python
 from pydantic import BaseModel, Field
 
@@ -119,6 +122,8 @@ class Filter:
         return body
 ```
 
+</details>
+
 Enable this filter globally or attach it to specific models in **Admin Panel → Functions**. The `max_turns` valve is configurable per-model via the model card, so you can set a smaller window for local 8k models and a larger one for Gemini 1M.
 
 :::info Why the tool-call repair block?
@@ -135,6 +140,9 @@ This second example does that. It:
 - Reads per-model budgets from a valve, so a single instance of the filter works for your 8k local model and your 1M Gemini at the same time.
 - Leaves a configurable headroom for the response.
 - Re-applies the tool-call repair from the first example after trimming.
+
+<details>
+<summary>Show the full filter code (per-model token-budget trimmer)</summary>
 
 ```python
 import json
@@ -259,6 +267,8 @@ class Filter:
         body["messages"] = system_msgs + other_msgs
         return body
 ```
+
+</details>
 
 A few things worth noticing:
 
