@@ -1,0 +1,162 @@
+---
+sidebar_position: 5
+title: "Essentials for New Users"
+---
+
+# Essentials for New Users
+
+So you've installed Open WebUI, connected a provider, and had your first conversation. Now what?
+
+This page walks through the handful of things that make the difference between *"a chat UI"* and *"a setup that actually works well day-to-day."* Nothing here is required — you can ignore it and keep chatting — but if you've ever wondered "can Open WebUI do X?" the answer is almost certainly **yes, with one of these five pieces**.
+
+Work through in order, or jump to the part that matches your question:
+
+1. [**Plugins** — what they are and when to install one](#-plugins-the-extensibility-story)
+2. [**Context management** — why long chats eventually error out](#-context-management-why-long-chats-break)
+3. [**Task models** — the invisible model that writes your chat titles](#-task-models-the-invisible-model-behind-the-ui)
+4. [**Basic RAG** — chatting with your own documents](#-basic-rag-chatting-with-your-own-documents)
+5. [**Tool calling** — letting the model do things, not just talk](#-tool-calling-letting-the-model-do-things)
+
+---
+
+## 🧩 Plugins: the extensibility story
+
+Open WebUI is intentionally small at the core. Most of the "wow" things people show in demos — auto-translation, token/cost tracking, image generation buttons, custom post-processing, provider integrations that aren't OpenAI or Ollama — are **plugins**, not built-in features. Knowing the plugin landscape is the biggest single unlock for a new user.
+
+There are two plugin families, and the name of the family tells you what it does:
+
+| Family | What it does | Where it runs | Examples |
+| :--- | :--- | :--- | :--- |
+| **Tools** | Give the model new abilities ("call this function when you need X") | In Open WebUI's process, invoked by the model during a chat | Web search, stock quote, weather, run Python, query a database |
+| **Functions — Pipes** | Add a new "model" to the model picker, backed by custom code | Same | Proxy to a non-supported provider (Anthropic, Perplexity, Grok…), custom agent pipelines |
+| **Functions — Filters** | Modify every request and/or response as it passes through | Same, on every chat turn | Context trimming, PII scrubbing, token counting, Langfuse tracing, response formatting |
+| **Functions — Actions** | Add a button under each message that runs custom code | Same, when the user clicks | "Regenerate without tools", "Translate reply", "Pin message", "Save to Knowledge" |
+
+**How you install them:** the [Open WebUI Community site](https://openwebui.com/) hosts the one-click catalog — pick one, click "Get", paste into **Admin Panel → Functions** (or **Tools**), flip it on, and configure its **valves** (the plugin's settings).
+
+**When to install one:** when you think "it would be nice if Open WebUI did X." It almost certainly already does — via a plugin. Before writing your own, search the community site. Even if nothing matches exactly, the closest hit is usually ~20 lines from what you want.
+
+Reference reading:
+- [Plugin overview](/features/extensibility)
+- [Tools reference](/features/extensibility/plugin/tools)
+- [Functions reference (Pipes/Filters/Actions)](/features/extensibility/plugin/functions)
+
+---
+
+## 🧠 Context management: why long chats break
+
+After enough back-and-forth you will eventually see:
+
+> `The prompt is too long: 207601, model maximum context length: 202751`
+
+This error does **not** come from Open WebUI — it comes from your model provider. Every time you send a new message, the *entire* conversation (system prompt + all previous turns + attached files + tool call results + your new message) is sent as the "prompt." When the sum exceeds the model's context window, the provider rejects the request.
+
+Open WebUI intentionally does not ship a built-in trimmer, because:
+
+- Every model uses a **different tokenizer** (GPT ≠ Claude ≠ Gemini ≠ GLM ≠ Llama).
+- Every model has a **different context window** (8k → 1M).
+- Every deployment wants a **different policy** (trim by tokens, by turns, by message count, drop attachments first, summarize older messages, etc.).
+
+There is no single correct answer. The supported approach is to install a **filter Function** that trims the conversation on your terms. Community filters for most of the common policies already exist and can be installed with one click; if none fits, the code is short enough to copy and adapt.
+
+➡️ Full guide, including a minimal "newest N turns" filter you can paste into your instance: [Troubleshooting → Context Window / Prompt Too Long](/troubleshooting/context-window).
+
+---
+
+## 🤖 Task models: the invisible model behind the UI
+
+Every time Open WebUI needs a short bit of "thinking" for a UI feature — writing a chat **title** for the sidebar, generating **tags**, suggesting **follow-up questions**, powering the **autocomplete** in the prompt box — it calls a **Task Model**. By default it uses whatever model you're currently chatting with, which means:
+
+- Your expensive flagship model gets hit every time you open a new chat just to write "Groceries list"
+- On a slow local model, every keystroke feels laggy because autocomplete is blocking on a 30B-parameter model
+- A reasoning model (o1, r1, Claude with extended thinking) spends 5 seconds *thinking* before producing the three-word title
+
+**Fix:** in **Admin Panel → Settings → Interface**, set a dedicated Task Model. Two fields, because the right choice depends on what your main chat model is:
+
+- **Task Model (External)** — used when you are chatting with a cloud model (OpenAI, Anthropic, etc.). Set this to a fast, cheap, *non-reasoning* cloud model like `gpt-5-nano`, `gemini-2.5-flash-lite`, or `llama-3.1-8b-instant`.
+- **Task Model (Local)** — used when you are chatting with a local model (Ollama, llama.cpp, vLLM). Set this to a tiny local model like `qwen3:1b`, `gemma3:1b`, or `llama3.2:3b`.
+
+The main chat experience doesn't change. The background chores just stop dragging.
+
+While you're there, if you are on a low-spec machine or don't need them, you can also disable the chores entirely:
+
+- `ENABLE_AUTOCOMPLETE_GENERATION=False` — fires on every keystroke, the single biggest "make it snappy" toggle
+- `ENABLE_FOLLOW_UP_GENERATION=False`
+- `ENABLE_TITLE_GENERATION=False`
+- `ENABLE_TAGS_GENERATION=False`
+
+More detail: [Performance & RAM → Dedicated Task Models](/troubleshooting/performance#1-dedicated-task-models).
+
+---
+
+## 📚 Basic RAG: chatting with your own documents
+
+**RAG** (Retrieval-Augmented Generation) is the feature that lets you say "Here's a 400-page PDF, answer my questions about it" without the model having to (or being able to) read the whole thing every turn. Open WebUI splits your documents into chunks, embeds them as vectors, stores them in a vector DB, and at chat time retrieves just the relevant bits and passes those to the model.
+
+Two ways to use it, in order of simplicity:
+
+1. **One-off attachments.** Drag a file into any chat input and ask questions. The file is chunked and embedded just for that chat.
+2. **Knowledge bases.** For documents you want to reuse across many chats (company handbook, codebase, research library, user manual), go to **Workspace → Knowledge** and create a knowledge base. You can then attach the *entire* knowledge base to a chat (via the `#` shortcut in the input), or bind it to a model in **Workspace → Models** so that model always has it available.
+
+The defaults are reasonable for getting started. When you outgrow them, there are three knobs that matter most:
+
+- **Embedding engine.** The default (SentenceTransformers `all-MiniLM-L6-v2`) runs locally on CPU and consumes ~500 MB of RAM per worker. For any multi-user deployment, point at an external embeddings API (OpenAI, or Ollama with `nomic-embed-text`) via `RAG_EMBEDDING_ENGINE`.
+- **Content extraction engine.** The default uses `pypdf`, which leaks memory during heavy ingestion. For anything beyond casual use, switch to **Tika** or **Docling** via `CONTENT_EXTRACTION_ENGINE`.
+- **Vector database.** The default ChromaDB (local SQLite-backed) does not tolerate multi-worker deployments. At scale, use **Milvus**, **Qdrant**, or **PGVector**.
+
+None of these matter for "a single user with a handful of PDFs." All of them start mattering the moment you have 100 documents or 10 concurrent users.
+
+More detail:
+- [RAG overview](/features/chat-conversations/rag/)
+- [Knowledge workspace](/features/workspace/knowledge)
+- [Performance tuning for RAG](/troubleshooting/performance#embedding-engine)
+
+---
+
+## 🔧 Tool calling: letting the model do things
+
+Tool calling is what turns an LLM from "a very smart text box" into "an assistant that can actually go look things up, run code, and take actions." You attach a **Tool** to your chat (or your model), and the model decides — mid-response — when to call it, with what arguments. Open WebUI runs it, returns the result, and the model continues.
+
+Two things every new user should configure:
+
+### 1. Turn on Native tool calling
+
+Open WebUI has two tool-calling modes: **Default** (older, prompt-based) and **Native** (uses the provider's own tool/function-calling API). Native is faster, more reliable, doesn't eat into the context window with long tool-use instructions, and preserves KV cache. If your model supports it (all mainstream ones do — OpenAI, Anthropic, Gemini, Llama 3.1+, Qwen 2.5+, DeepSeek, and more), turn it on:
+
+- Per-model: **Workspace → Models → [your model] → Advanced Params → Function Calling = Native**
+- Per-chat override: in a chat's **Chat Controls** (right sidebar)
+
+If a tool "isn't being called" on a capable model, 90% of the time Native mode just needs flipping on.
+
+### 2. Install a few Tools
+
+Tools are plugins — installed the same way as Functions. Browse the [community site](https://openwebui.com/) for:
+
+- **Web search** — let the model fetch current information (there's also a built-in web-search option under Admin → Settings → Web Search)
+- **Code execution** — run Python for calculations, data analysis, plots
+- **File/filesystem access** — read/write files, useful for local workflows
+- **Domain tools** — weather, stocks, time, APIs specific to your work
+
+Tools show up in the `+` menu in the chat input. Enable the ones you want for a given chat; the model only sees the tools you've enabled.
+
+For image generation, there's a first-party integration (**Admin → Settings → Images** with ComfyUI, Automatic1111, OpenAI, or Gemini) rather than a tool — same idea, different plumbing.
+
+More detail:
+- [Tools reference](/features/extensibility/plugin/tools)
+- [Tool-calling modes (Default vs Native)](/features/extensibility/plugin/tools#tool-calling-modes-default-vs-native)
+
+---
+
+## What to do next
+
+You don't need all of the above on day one. A reasonable order for a new install:
+
+1. **Day one:** pick a good default model, have a few conversations, get a feel for the UI.
+2. **Within the first week:** set a Task Model so titles/autocomplete stop using your main model. Install one or two Tools that match your work.
+3. **When you hit it:** install a context filter the first time you see "prompt is too long."
+4. **When you need it:** set up a Knowledge base the first time you want to ask questions across multiple documents.
+5. **When you scale up:** revisit the RAG infrastructure section if you go beyond a single user.
+
+Everything else — enterprise SSO, multi-replica HA, Redis scaling, observability — is in [Advanced Topics](/getting-started/advanced-topics) and [Troubleshooting](/troubleshooting) when and if you need it.
+
+Welcome aboard. 👋
