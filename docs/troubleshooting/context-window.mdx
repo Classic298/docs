@@ -60,7 +60,7 @@ Typical approaches, in increasing order of sophistication:
 4. **Summarize-and-replace.** When the window is about to overflow, call a cheap model to summarize the oldest block of messages, then replace that block with a single assistant-authored summary message. Preserves long-running context without busting the window.
 5. **Attachment- or tool-output-first trimming.** Strip large file contents or tool results from old turns before touching the dialogue.
 
-Community filters for most of these already exist on the [Open WebUI community site](https://openwebui.com/functions). Install one, configure its valves, and you're done. If none fits your policy exactly, copy the closest one into the **Functions** admin page and edit it — filters are pure Python and easy to tweak.
+Community filters for most of these already exist on the [Open WebUI community site](https://openwebui.com/). Install one, configure its valves, and you're done. If none fits your policy exactly, copy the closest one into the **Functions** admin page and edit it — filters are pure Python and easy to tweak.
 
 ### Minimal example: "newest N turns" filter
 
@@ -126,5 +126,5 @@ Both are valid UX choices. Pick the one that matches your deployment.
 ## Related
 
 - [Filter Functions](/features/extensibility/plugin/functions/filter) — the full reference for `inlet()` / `stream()` / `outlet()`
-- [Community Functions](https://openwebui.com/functions) — browse and install community-built filters, including context-management ones
+- [Open WebUI Community](https://openwebui.com/) — browse and install community-built filters, including context-management ones
 - [Chat Parameters](/features/chat-conversations/chat-features/chat-params) — per-chat, per-user, and per-model parameter precedence
