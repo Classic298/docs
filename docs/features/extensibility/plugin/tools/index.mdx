@@ -85,7 +85,7 @@ While chatting, click the **➕ (plus)** icon in the input area. You’ll see a 
 4. ✅ Check the Tools you want this model to always have access to by default.
 5. Click **Save**.
 
-You can also let your LLM auto-select the right Tools using the [**AutoTool Filter**](https://openwebui.com/f/hub/autotool_filter/).
+For models that support it, **Native tool calling mode** (see [Tool Calling Modes](#tool-calling-modes-default-vs-native) below) lets the model itself decide which of the attached tools to call on each turn. This replaces the older prompt-injection "auto-tool" filter approach and is the recommended way to let the model auto-select tools.
 
 :::caution Attached Tools Still Require User Access
 Attaching a workspace tool to a model does **not** bypass access control. When a user chats with the model, Open WebUI checks whether **that specific user** has read access to each attached tool. Tools the user cannot access are silently skipped — the model won't be able to call them.
