@@ -30,6 +30,10 @@ This is perfect for personal use, small teams, or evaluation. The scaling journe
 
 **When:** You plan to run more than one Open WebUI instance, or you want better performance and reliability for your database. **You should also switch if your SQLite file lives on anything other than a locally-attached SSD/NVMe** — see the callout below.
 
+:::tip You don't need this step if you're a single-replica deployment on local disk
+**Staying on SQLite is fine for:** single-replica deployments, personal use, evaluation, home lab setups, and small teams — **as long as the database file lives on a locally-attached SSD/NVMe and you're not running multiple replicas or workers.** The 0.8 → 0.9 async-backend story only bites when `webui.db` is on network storage; on local disk, SQLite is fast, supported, and a perfectly reasonable default. No migration needed. Skip this step and move on to whichever later step you actually need.
+:::
+
 SQLite stores everything in a single file and doesn't handle concurrent writes from multiple processes well. PostgreSQL is a production-grade database that supports many simultaneous connections.
 
 **What to do:**

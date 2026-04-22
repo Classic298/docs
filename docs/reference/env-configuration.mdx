@@ -6359,8 +6359,12 @@ For configuration using individual parameters or encrypted SQLite, see the relev
 
 :::
 
-:::danger SQLite only works on locally-attached SSD/NVMe
-The default `sqlite:///${DATA_DIR}/webui.db` URL is fine **only** if `DATA_DIR` is on a locally-attached disk on the host running Open WebUI. Running SQLite on **NFS, CIFS/SMB, Azure Files, GlusterFS, CephFS, or any Kubernetes PersistentVolumeClaim backed by network storage is not supported** — this is SQLite upstream's own position ([SQLite FAQ #5](https://www.sqlite.org/faq.html#q5)), and under the async backend (0.9.0+) it will produce pool-timeout errors (`QueuePool limit of size N overflow M reached`), multi-minute stalls, WAL deadlocks, and potential database corruption.
+:::tip Single-user / single-replica on local disk? The default is fine.
+The default `sqlite:///${DATA_DIR}/webui.db` is a perfectly good choice for personal use, evaluation, home-lab setups, and small single-replica deployments — **as long as `DATA_DIR` lives on a locally-attached SSD/NVMe**. No migration needed. The rest of this callout is for operators running on network storage or scaling out.
+:::
+
+:::danger SQLite is only supported on locally-attached SSD/NVMe
+Running SQLite on **NFS, CIFS/SMB, Azure Files, GlusterFS, CephFS, or any Kubernetes PersistentVolumeClaim backed by network storage is not supported** — this is SQLite upstream's own position ([SQLite FAQ #5](https://www.sqlite.org/faq.html#q5)), and under the async backend (0.9.0+) it will produce pool-timeout errors (`QueuePool limit of size N overflow M reached`), multi-minute stalls, WAL deadlocks, and potential database corruption.
 
 **For multi-replica, multi-worker, Kubernetes, Docker Swarm, or any deployment where `DATA_DIR` is on shared/network storage, set `DATABASE_URL` to a PostgreSQL URL:**
 
