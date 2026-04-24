@@ -1514,6 +1514,37 @@ This variable replaces the deprecated `API_KEY_ALLOWED_ENDPOINTS` environment va
 
 :::
 
+#### `CUSTOM_API_KEY_HEADER`
+
+- Type: `str`
+- Default: `x-api-key`
+- Description: Name of the HTTP header the auth middleware checks for API-key credentials. Useful when Open WebUI sits behind a reverse proxy or API gateway that consumes the `Authorization` header for its own authentication — set this to a distinct header (for example `X-OpenWebUI-Key`) so clients can deliver their Open WebUI API key without colliding with the proxy's own auth.
+- Read at startup from the process environment (not a `PersistentConfig`).
+
+**How the auth middleware picks up a credential**, in order:
+
+1. `Authorization: Bearer <token>` (most common — API key or JWT)
+2. `token` cookie (Bearer — used by the WebUI itself)
+3. The header named by `CUSTOM_API_KEY_HEADER` (default `x-api-key`)
+
+If none of the three is present, the request falls through as anonymous.
+
+:::tip Behind a proxy that eats `Authorization`?
+Many corporate gateways (basic auth, mutual TLS adapters, SSO sidecars) consume the `Authorization` header and never forward it upstream. In that case, point your clients at the custom header instead:
+
+```bash
+curl -H "X-OpenWebUI-Key: sk-..." http://openwebui.internal/api/models
+```
+
+And set on the Open WebUI container:
+
+```
+CUSTOM_API_KEY_HEADER=X-OpenWebUI-Key
+```
+
+The header name is matched case-insensitively by the ASGI layer, so pick whatever fits your naming convention.
+:::
+
 ### Model Caching
 
 #### `ENABLE_BASE_MODELS_CACHE`
