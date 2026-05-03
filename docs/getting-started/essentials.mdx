@@ -16,6 +16,10 @@ Work through in order, or jump to the section you need:
 5. [**Basic RAG**](#basic-rag)
 6. [**Open Terminal**](#open-terminal)
 
+:::tip Deploying for a team?
+If you are setting up Open WebUI for multiple users, also read the [**Scaling Open WebUI**](/getting-started/advanced-topics/scaling) guide. It covers infrastructure decisions (PostgreSQL, Redis, external vector databases, shared storage) that are separate from the feature-level essentials on this page. The two guides are additive — work through the essentials here for day-to-day usage, and the scaling guide for multi-user infrastructure.
+:::
+
 ---
 
 ## Tool calling
@@ -224,6 +228,8 @@ More detail:
 - [RAG overview](/features/chat-conversations/rag/)
 - [Knowledge workspace](/features/workspace/knowledge)
 - [Performance tuning for RAG](/troubleshooting/performance#embedding-engine)
+- [Scaling: external vector database](/getting-started/advanced-topics/scaling#step-4--switch-to-an-external-vector-database) — required for multi-worker and multi-replica deployments
+- [Scaling: content extraction & embeddings](/getting-started/advanced-topics/scaling#step-6--fix-content-extraction--embeddings) — fixing memory leaks at scale
 
 ---
 
