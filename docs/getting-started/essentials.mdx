@@ -59,6 +59,13 @@ If you are running an older local model or a fine-tune that does not expose a fu
 
 Many of the tools people look for are already built into Open WebUI and just need to be turned on: **web search**, **code execution**, **image generation**, **memory**, and **knowledge-base retrieval** are all available without installing any plugins. Once enabled, these appear automatically as system tools when using Native Mode.
 
+Most of these need a small amount of setup (choosing a provider, adding an API key, or enabling a toggle). Setup guides for the most popular ones:
+
+- [**Web Search**](/features/chat-conversations/web-search/) — connect a search provider (Google, Brave, DuckDuckGo, SearXNG, and many more) so the model can look things up
+- [**Image Generation**](/features/chat-conversations/image-generation-and-editing/usage) — connect an image provider (OpenAI DALL-E, ComfyUI, Automatic1111, etc.) for in-chat image creation
+- [**Code Execution**](/features/chat-conversations/chat-features/code-execution/) — run code blocks directly in chat (Pyodide runs in-browser by default, or connect Jupyter for server-side execution)
+- [**Memory**](/features/chat-conversations/memory) — let the model remember facts about you across conversations
+
 For anything not built in, the [**Open WebUI Community site**](https://openwebui.com/) is worth browsing. A few categories to give a sense of what is available:
 
 - **Observability / cost tracking**: Langfuse, OpenLit, Portkey. Log every chat turn, token usage, and latency to your own stack.
