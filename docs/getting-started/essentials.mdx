@@ -201,6 +201,31 @@ The defaults are reasonable for getting started. When you outgrow them, there ar
 None of these matter for "a single user with a handful of PDFs." All of them start mattering the moment you have 100 documents or 10 concurrent users.
 :::
 
+### Recommended starting config
+
+If you just want RAG to work well out of the box, these settings are a solid general-purpose starting point. They are not fine-tuned for every use case, but they will produce noticeably better results than the defaults for most document types.
+
+Set these in **Admin Panel > Settings > Documents**, or via environment variables:
+
+| Setting | Recommended value | Default | Why |
+|---------|-------------------|---------|-----|
+| **Top K** | `5` | `3` | Retrieves more candidate chunks, giving the model more context to work with |
+| **Chunk Size** | `1000` | `1000` | The default is fine for most documents |
+| **Chunk Overlap** | `200` | `100` | More overlap means less chance of cutting a key sentence in half |
+| **Hybrid Search** | **On** | Off | Combines keyword (BM25) and vector search for better recall |
+| **Embedding Model** | `sentence-transformers/all-MiniLM-L6-v2` | same | The default is a good balance of speed and quality for getting started |
+
+```bash
+# Environment variable equivalents
+RAG_TOP_K=5
+CHUNK_OVERLAP=200
+ENABLE_RAG_HYBRID_SEARCH=True
+```
+
+:::tip When you are ready to invest more
+The biggest single upgrade is switching to a better embedding model. If you have an OpenAI API key, `text-embedding-3-small` is a large step up in retrieval quality. If you run Ollama, `nomic-embed-text` is excellent and free. Set the model via `RAG_EMBEDDING_MODEL` and the engine via `RAG_EMBEDDING_ENGINE`.
+:::
+
 More detail:
 - [RAG overview](/features/chat-conversations/rag/)
 - [Knowledge workspace](/features/workspace/knowledge)
