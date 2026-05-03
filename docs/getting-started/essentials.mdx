@@ -213,7 +213,7 @@ Set these in **Admin Panel > Settings > Documents**, or via environment variable
 | **Markdown Header Splitting** | **On** | On | Respects document structure by splitting at headings, keeping sections coherent |
 | **Chunk Size** | `2000` | `1000` | Larger chunks preserve more surrounding context per retrieval hit |
 | **Chunk Overlap** | `200` | `100` | More overlap means less chance of cutting a key sentence in half |
-| **Top K** | `15` | `3` | Retrieves more candidate chunks, giving the model a wider pool of relevant context |
+| **Top K** | `15` | `3` | Retrieves more candidate chunks, giving the model a wider pool of relevant context. If you are working with local models that have constrained context sizes, lower this to `5` to avoid filling the context window with retrieved chunks |
 | **Embedding Model** | External (OpenAI or Ollama) | `all-MiniLM-L6-v2` (local CPU) | The default works for a single user but consumes ~500 MB RAM per worker. For any multi-user setup, use an external embedding API instead |
 
 ```bash
