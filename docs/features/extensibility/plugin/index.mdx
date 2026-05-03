@@ -36,7 +36,7 @@ The pages that follow document the full plugin API surface: class shapes, lifecy
 
 What these docs cannot cover is the range of things people actually build with it. Community plugins have been used for live-streaming HTML dashboards, per-user cost enforcement, context managers that summarize and replace older turns, bidirectional interactive UIs, in-chat MCP apps, forensic watermarking, and much more.
 
-Before filing a feature request, consider whether a plugin can solve it — in most cases, it can.
+If you are considering a feature request and thinking "this needs a core change," first ask whether it can be done as a plugin. The plugin system has access to the full request/response lifecycle, persistent state, user metadata, the event emitter, and the admin-configurable valves system. In practice, most features that feel like they need core changes — custom authentication logic, per-user rate limiting, response post-processing, provider-specific routing, cost tracking, context management strategies — can be implemented entirely as a plugin without touching the core codebase. Filing a plugin on the community site also means other users benefit immediately, without waiting for a release cycle.
 :::
 
 ## What are "Tools" and "Functions"?
