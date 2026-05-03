@@ -205,7 +205,7 @@ None of these matter for "a single user with a handful of PDFs." All of them sta
 
 If you just want RAG to work well out of the box, these settings are a solid general-purpose starting point. They are not fine-tuned for every use case, but they will produce noticeably better results than the defaults for most document types.
 
-Set these in **Admin Panel > Settings > Documents**, or via environment variables:
+Set these in **Admin Panel > Settings > Documents**:
 
 | Setting | Recommended value | Default | Why |
 |---------|-------------------|---------|-----|
@@ -215,14 +215,6 @@ Set these in **Admin Panel > Settings > Documents**, or via environment variable
 | **Chunk Overlap** | `200` | `100` | More overlap means less chance of cutting a key sentence in half |
 | **Top K** | `15` | `3` | Retrieves more candidate chunks, giving the model a wider pool of relevant context. If you are working with local models that have constrained context sizes, lower this to `5` to avoid filling the context window with retrieved chunks |
 | **Embedding Model** | External (OpenAI or Ollama) | `all-MiniLM-L6-v2` (local CPU) | The default works for a single user but consumes ~500 MB RAM per worker. For any multi-user setup, use an external embedding API instead |
-
-```bash
-# Environment variable equivalents
-RAG_TEXT_SPLITTER=token
-CHUNK_SIZE=2000
-CHUNK_OVERLAP=200
-RAG_TOP_K=15
-```
 
 :::tip Embedding model
 The default SentenceTransformers model runs locally on CPU and is fine for a single user getting started. For anything beyond that, point at an external embeddings API: set `RAG_EMBEDDING_ENGINE=openai` with an OpenAI API key, or `RAG_EMBEDDING_ENGINE=ollama` with any Ollama embedding model (e.g., `nomic-embed-text`). This offloads the work and frees significant RAM.
