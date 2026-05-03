@@ -25,7 +25,6 @@ Typical for Ollama models on consumer hardware (Llama 3.1 8B, Qwen 2.5 7B, Gemma
 | **Chunk Overlap** | `100` | Standard overlap |
 | **Top K** | `3–5` | Fewer chunks to avoid blowing out your limited context budget |
 | **Full Context Mode** | Off | Cannot afford to send full documents |
-| **RAG System Context** | **On** (`RAG_SYSTEM_CONTEXT=True`) | Keeps KV cache stable across turns |
 
 :::tip Context budget math
 With a chunk size of 1000 tokens and Top K of 5, RAG will inject roughly 5,000 tokens of retrieved content. Add your system prompt and conversation history — if your model has an 8K context window, that leaves about 2–3K tokens for the conversation itself. Adjust Top K downward if follow-up questions get cut off.
@@ -43,7 +42,6 @@ Typical for OpenAI (GPT-4o, GPT-5), Anthropic (Claude), Google (Gemini), DeepSee
 | **Chunk Overlap** | `200` | More overlap prevents sentence splits |
 | **Top K** | `15–25` | Cast a wide net — you have the context budget for it |
 | **Full Context Mode** | Consider for small docs | If a document is under ~20K tokens, full context can outperform retrieval |
-| **RAG System Context** | **On** (`RAG_SYSTEM_CONTEXT=True`) | Enables prompt caching (OpenAI, Anthropic, Gemini all benefit) |
 
 :::tip When to use Full Context Mode
 If you are working with a single small-to-medium document (under ~50 pages) and a large-context model, Full Context Mode often gives better results than chunked retrieval because the model sees everything with no retrieval gaps. Toggle it per-chat in the chat settings.
@@ -60,7 +58,6 @@ If you use both local and cloud models, configure for the lowest common denomina
 | **Chunk Size** | `1500` | Compromise — not too large for local, not too small for cloud |
 | **Chunk Overlap** | `200` | Safe default |
 | **Top K** | `10` | Moderate — can be overridden per-chat via Chat Controls |
-| **RAG System Context** | **On** | Benefits both local and cloud |
 
 :::note Per-chat overrides
 You can override Top K and Full Context Mode on a per-chat basis in the **Chat Controls** (right sidebar). This lets you keep conservative global defaults while going aggressive for specific conversations with large-context models.
