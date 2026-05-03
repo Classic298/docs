@@ -209,21 +209,23 @@ Set these in **Admin Panel > Settings > Documents**, or via environment variable
 
 | Setting | Recommended value | Default | Why |
 |---------|-------------------|---------|-----|
-| **Top K** | `5` | `3` | Retrieves more candidate chunks, giving the model more context to work with |
-| **Chunk Size** | `1000` | `1000` | The default is fine for most documents |
+| **Text Splitter** | `token` | `character` | Token-based splitting produces more consistent chunk sizes across document types |
+| **Markdown Header Splitting** | **On** | On | Respects document structure by splitting at headings, keeping sections coherent |
+| **Chunk Size** | `2000` | `1000` | Larger chunks preserve more surrounding context per retrieval hit |
 | **Chunk Overlap** | `200` | `100` | More overlap means less chance of cutting a key sentence in half |
-| **Hybrid Search** | **On** | Off | Combines keyword (BM25) and vector search for better recall |
-| **Embedding Model** | `sentence-transformers/all-MiniLM-L6-v2` | same | The default is a good balance of speed and quality for getting started |
+| **Top K** | `15` | `3` | Retrieves more candidate chunks, giving the model a wider pool of relevant context |
+| **Embedding Model** | External (OpenAI or Ollama) | `all-MiniLM-L6-v2` (local CPU) | The default works for a single user but consumes ~500 MB RAM per worker. For any multi-user setup, use an external embedding API instead |
 
 ```bash
 # Environment variable equivalents
-RAG_TOP_K=5
+RAG_TEXT_SPLITTER=token
+CHUNK_SIZE=2000
 CHUNK_OVERLAP=200
-ENABLE_RAG_HYBRID_SEARCH=True
+RAG_TOP_K=15
 ```
 
-:::tip When you are ready to invest more
-The biggest single upgrade is switching to a better embedding model. If you have an OpenAI API key, `text-embedding-3-small` is a large step up in retrieval quality. If you run Ollama, `nomic-embed-text` is excellent and free. Set the model via `RAG_EMBEDDING_MODEL` and the engine via `RAG_EMBEDDING_ENGINE`.
+:::tip Embedding model
+The default SentenceTransformers model runs locally on CPU and is fine for a single user getting started. For anything beyond that, point at an external embeddings API: set `RAG_EMBEDDING_ENGINE=openai` with an OpenAI API key, or `RAG_EMBEDDING_ENGINE=ollama` with any Ollama embedding model (e.g., `nomic-embed-text`). This offloads the work and frees significant RAM.
 :::
 
 More detail:
