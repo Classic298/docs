@@ -15,6 +15,7 @@ Work through in order, or jump to the section you need:
 4. [**Context management**](#context-management)
 5. [**Basic RAG**](#basic-rag)
 6. [**Open Terminal**](#open-terminal)
+7. [**Troubleshooting**](#troubleshooting)
 
 :::tip Deploying for a team?
 If you are setting up Open WebUI for multiple users, also read the [**Scaling Open WebUI**](/getting-started/advanced-topics/scaling) guide. It covers infrastructure decisions (PostgreSQL, Redis, external vector databases, shared storage) that are separate from the feature-level essentials on this page. The two guides are additive — work through the essentials here for day-to-day usage, and the scaling guide for multi-user infrastructure.
@@ -283,11 +284,11 @@ When something goes wrong, start here:
 | Image generation errors or provider setup | [Image Generation Troubleshooting](/troubleshooting/image-generation) |
 | Speech-to-text, text-to-speech, or audio playback | [Audio Troubleshooting](/troubleshooting/audio) |
 | SSO, OAuth, or LDAP login issues | [SSO & OAuth Troubleshooting](/troubleshooting/sso) |
-| High memory usage, slow responses, or worker crashes | [Performance & RAM](/troubleshooting/performance) |
-| Login loops, config drift, or database locks in multi-replica setups | [Scaling & HA Troubleshooting](/troubleshooting/multi-replica) |
+| High memory usage, slow responses, or worker crashes | [Performance & RAM](/troubleshooting/performance) · [Scaling Guide](/getting-started/advanced-topics/scaling) |
+| Login loops, config drift, or database locks in multi-replica setups | [Scaling & HA Troubleshooting](/troubleshooting/multi-replica) · [Scaling Guide](/getting-started/advanced-topics/scaling) |
 | Locked out of admin account | [Reset Admin Password](/troubleshooting/password-reset) |
 | TLS certificate errors with custom/internal CAs | [Custom CA Store](/troubleshooting/custom-ca) |
-| Migrating between SQLite and PostgreSQL | [Database Migration](/troubleshooting/manual-database-migration) |
+| Alembic migration errors or manual schema fixes | [Database Migration](/troubleshooting/manual-database-migration) |
 
 ---
 
