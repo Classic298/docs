@@ -162,8 +162,7 @@ If the GPU version isn't using your GPU:
 
 ### Connection Issues from Open WebUI
 
-If Open WebUI can't reach Kokoro, this is usually a Docker 
-networking issue. Choose the method that matches your setup:
+If Open WebUI can't reach Kokoro, this is usually a Docker networking issue. Choose the method that matches your setup:
 
 **Option 1 — Docker Desktop (Windows/Mac):**
 
