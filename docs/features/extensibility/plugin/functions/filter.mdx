@@ -144,7 +144,7 @@ The chip being present = the filter is enabled for the next request. The chip be
 
 ---
 
-### Owning Retrieval With `file_handler` (Custom RAG From a Filter) {#file-handler-custom-rag}
+### Owning Retrieval With file_handler
 
 By default, when a user attaches a knowledge collection or uploads a file to a chat, Open WebUI runs the built-in RAG pipeline **after** every inlet filter has returned. The chat-completion handler queries the vector DB for chunks relevant to the user's last message, wraps them in `<source>` tags, appends them to the last user message (or to a system message, depending on `RAG_SYSTEM_CONTEXT`), and only then calls the LLM.
 
