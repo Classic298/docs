@@ -3,7 +3,7 @@ sidebar_position: 3
 title: "Filter Function"
 ---
 
-# 🪄 Filter Function: Modify Inputs and Outputs
+# Filter Function: Modify Inputs and Outputs
 
 :::danger ⚠️ Critical Security Warning
 **Filter Functions execute arbitrary Python code on your server.** Function creation is restricted to administrators only. Only install from trusted sources and review code before importing. A malicious Function could access your file system, exfiltrate data, or compromise your entire system. For full details, see the [Plugin Security Warning](/features/extensibility/plugin/).
@@ -15,7 +15,7 @@ This guide will break down **what Filters are**, how they work, their structure,
 
 ---
 
-## 🌊 What Are Filters in Open WebUI?
+## What Are Filters in Open WebUI?
 
 Imagine Open WebUI as a **stream of water** flowing through pipes:
 
@@ -36,11 +36,11 @@ Filters are like **translators or editors** in the AI workflow: you can intercep
 
 ---
 
-## 🗺️ Structure of a Filter Function: The Skeleton
+## Structure of a Filter Function: The Skeleton
 
 Let's start with the simplest representation of a Filter Function. Don't worry if some parts feel technical at first—we’ll break it all down step by step!
 
-### 🦴 Basic Skeleton of a Filter
+### Basic Skeleton of a Filter
 
 ```python
 from pydantic import BaseModel
@@ -73,7 +73,7 @@ class Filter:
 
 ---
 
-### 🧲 Toggleable Filters: Making Filters User-Controllable (`self.toggle`)
+### Toggleable Filters: Making Filters User-Controllable (`self.toggle`)
 
 By default a filter that's **active and in scope** (global, or attached to the model) runs on every request — the user has no say in it. That's often what you want (PII scrubbing, logging, mandatory guardrails). Sometimes you want the opposite: let the user decide whether the filter runs for a given conversation.
 
@@ -144,7 +144,7 @@ The chip being present = the filter is enabled for the next request. The chip be
 
 ---
 
-### 📚 Owning Retrieval With `file_handler` (Custom RAG From a Filter) {#file-handler-custom-rag}
+### Owning Retrieval With `file_handler` (Custom RAG From a Filter) {#file-handler-custom-rag}
 
 By default, when a user attaches a knowledge collection or uploads a file to a chat, Open WebUI runs the built-in RAG pipeline **after** every inlet filter has returned. The chat-completion handler queries the vector DB for chunks relevant to the user's last message, wraps them in `<source>` tags, appends them to the last user message (or to a system message, depending on `RAG_SYSTEM_CONTEXT`), and only then calls the LLM.
 
@@ -223,9 +223,9 @@ A naive alternative is to clear `body["metadata"]["files"] = []` and `body["file
 
 ---
 
-## ⚙️ Filter Administration & Configuration
+## Filter Administration & Configuration
 
-### 🌐 Global Filters vs. Model-Specific Filters
+### Global Filters vs. Model-Specific Filters
 
 Open WebUI provides a flexible multi-level filter system that allows you to control which filters are active, how they're enabled, and who can toggle them. Understanding this system is crucial for effective filter management.
 
@@ -270,7 +270,7 @@ POST /functions/id/{filter_id}/toggle/global
 
 ---
 
-### 🎛️ The Two-Tier Filter System
+### The Two-Tier Filter System
 
 Open WebUI uses a sophisticated two-tier system for managing filters on a per-model basis. This can be confusing at first, but it's designed to support both **always-on filters** and **user-toggleable filters**.
 
@@ -337,7 +337,7 @@ class Filter:
 
 ---
 
-### 🔄 Toggleable Filters vs. Always-On Filters
+### Toggleable Filters vs. Always-On Filters
 
 Understanding the difference between these two types is key to using the filter system effectively.
 
@@ -427,7 +427,7 @@ class WebSearchFilter:
 
 ---
 
-### 📊 Filter Execution Flow
+### Filter Execution Flow
 
 Here's the complete flow from admin configuration to filter execution:
 
@@ -465,7 +465,7 @@ Here's the complete flow from admin configuration to filter execution:
 
 ---
 
-### 📡 Filter Behavior with API Requests
+### Filter Behavior with API Requests
 
 When using Open WebUI's API endpoints directly (e.g., via `curl` or external applications), `inlet()` and `stream()` follow the same execution model as WebUI requests. `outlet()` is the one that behaves very differently for direct API callers and is covered in detail below.
 
@@ -687,7 +687,7 @@ Filters are sorted in **ascending** order by priority. A filter with `priority=0
 
 ---
 
-### 🔗 Data Passing Between Filters
+### Data Passing Between Filters
 
 When multiple filters are active, each filter in the chain receives the **modified data from the previous filter**. The returned value from one filter becomes the input to the next filter in the priority order.
 
@@ -1119,7 +1119,7 @@ async def stream(self, event: dict) -> dict:
 - Each line represents a **small fragment** of the model's streamed response.
 - The **`delta.content` field** contains the progressively generated text.
 
-##### 🔄 Example: Filtering Out Emojis from Streamed Data
+##### Example: Filtering Out Emojis from Streamed Data
 ```python
 async def stream(self, event: dict) -> dict:
     for choice in event.get("choices", []):
@@ -1252,7 +1252,7 @@ Publishing a curated package on **[openwebui.com](https://openwebui.com/)** lets
 
 ---
 
-## 🚧 Potential Confusion: Clear FAQ 🛑
+## Potential Confusion: Clear FAQ
 
 ### **Q: How Are Filters Different From Pipe Functions?**
 
