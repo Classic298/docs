@@ -11,6 +11,8 @@ Hence, Valves and UserValves class can be defined in a `Pipe`, `Filter`, `Action
 
 Function Valves are configurable by admins alone, since Functions are admin-only. Tool Valves can also be edited by the tool's owner and by anyone holding a write grant on it, so treat a tool's valves as readable by everyone you share write access with. UserValves are configurable by any user directly from a chat session.
 
+A function has to be enabled for its UserValves to be reachable: while it is disabled no specification is served for it, so nothing is offered to fill in, and an attempt to save values against it is refused with a `400`.
+
 <details>
 <summary>Commented example</summary>
 

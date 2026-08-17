@@ -252,6 +252,8 @@ Fire on `user.created` to shape a new user's first five minutes, and on `system.
 `auth.signup` is narrower and not a substitute. It fires only from the internal signup endpoint and means a person completed that form, so a handler keyed on it never hears about an account an administrator added, one LDAP created, or one that arrived through an identity provider.
 :::
 
+`auth.login` fires on every login path, single sign-on included, with `data.auth_method` naming the route and `data.provider` alongside it where an identity provider was involved. A first single sign-on emits `user.created` and then `auth.login`, so a handler watching both sees the account exist before the session opens. `auth.logout` carries the same attribution when the account being signed out has an identity-provider session behind it, and none when it does not, which is what lets a deprovisioning handler tell the two apart.
+
 - **Welcome chat.** Drop a pre-populated getting-started chat into the new user's sidebar, with an optional notification pointing at it.
 - **Auto-group assignment.** Add new users to default groups so they inherit the right models, channels, and permissions on day one.
 - **Apply interface defaults.** Push admin-chosen UI defaults onto new users, and re-apply to everyone when you change them.
