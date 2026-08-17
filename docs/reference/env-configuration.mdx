@@ -572,14 +572,22 @@ Treat anything in this cluster as *what the admin sees and does in the product U
 - Default: `0` (unset, the AnyIO default limit of `40` applies)
 - Description: Sets the maximum number of **concurrent** blocking operations that may run in the AnyIO worker thread pool at once. Open WebUI offloads synchronous/blocking work (many DB calls, file I/O, sync route handlers, some library calls) to this pool via `run_in_threadpool`. The value is a **concurrency ceiling (a token limit), not a fixed pool of pre-spawned OS threads and not a CPU-core/thread count**: worker threads are created lazily only when needed and reused, so a high value does **not** by itself create that many threads, consume CPU, or cause CPU contention while idle. It only raises how many blocking operations can be in flight simultaneously before the rest must queue.
 
+It bounds **both** paths Open WebUI offloads on: the AnyIO limiter behind `run_in_threadpool`, and the event loop's default executor behind `asyncio.to_thread`. The second one previously had no setting at all and sat at a fixed `min(32, cpu_count + 4)`, so vector database calls, storage reads, LDAP binds and password verification shared at most 32 slots however high this was set; because `cpu_count()` reports the host's cores rather than a container's limit, that figure was also derived from the whole machine rather than the container. The two pools are independent, so the per-process thread ceiling is twice this value, and both still fill lazily.
+
 :::warning Set this high on any real server (2000+); never lower it
 The AnyIO default of `40` is far too low for production. When more than `THREAD_POOL_SIZE` blocking operations are needed at once (many users acting at the same time, or a few users each triggering several blocking calls), every further request **waits** for a free slot. The symptom is the whole app appearing to **hang / freeze / stop responding** under load, even though CPU and memory look fine. It is pool starvation, not resource exhaustion.
 
 - **Normal servers / production:** `2000` or higher. `2000` is a *lower* bound for very large multi-user instances; going higher is fine and is **not** a CPU or contention risk (it is a ceiling, not a preallocation).
 - **Never decrease below the default.** An idle high ceiling costs effectively nothing; a low ceiling causes freezes.
-- **Exception, weak hardware (Raspberry Pi, tiny VPS, containers capped at ~250m CPU / very low RAM):** do **not** set `2000` here. Each *genuinely concurrent* blocking op still uses a real OS thread (stack memory), so on a tiny device an enormous ceiling lets a traffic burst spawn enough threads to exhaust RAM. Leave it at the default, or set a modest value (e.g. a few hundred) matched to what the device can actually absorb. This caveat applies only to constrained single-board / micro deployments; any normal server should use `2000+`.
+- **Exception, weak hardware (Raspberry Pi, tiny VPS, containers capped at ~250m CPU / very low RAM):** do **not** set `2000` here. Each *genuinely concurrent* blocking op still uses a real OS thread (stack memory), and the ceiling is applied to each of the two pools, so on a tiny device an enormous ceiling lets a traffic burst spawn enough threads to exhaust RAM. Leave it at the default, or set a modest value (e.g. a few hundred) matched to what the device can actually absorb. This caveat applies only to constrained single-board / micro deployments; any normal server should use `2000+`.
 
 :::
+
+#### `THREAD_POOL_THREAD_NAME_PREFIX`
+
+- Type: `str`
+- Default: Empty string (Python's own `ThreadPoolExecutor-N` naming)
+- Description: Prefix applied to the names of the threads in the event loop's default executor, the pool [`THREAD_POOL_SIZE`](#thread_pool_size) sizes. It is cosmetic: it exists so Open WebUI's offload threads can be told apart in thread dumps, profilers and any monitoring that groups by thread name. It has no effect unless `THREAD_POOL_SIZE` is set, since that is the only case where the executor is replaced.
 
 #### `ENABLE_CUSTOM_MODEL_FALLBACK`
 
