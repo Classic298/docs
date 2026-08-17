@@ -219,7 +219,7 @@ These are the two instance-wide settings that decide which model or models a use
 | Setting | Menu action | What it does | Config key |
 | :--- | :--- | :--- | :--- |
 | **Selected Model** | **Set as Selected Model** | Pre-selects this model in a new chat for users who have no model preference of their own | [`DEFAULT_MODELS`](/reference/env-configuration#default_models) |
-| **Pinned Model** | **Set as Pinned Model** | Pre-fills the model shortcuts in the sidebar for users who have not pinned any models themselves | [`DEFAULT_PINNED_MODELS`](/reference/env-configuration#default_pinned_models) |
+| **Pinned Model** | **Set as Pinned Model** | Fills the model shortcuts in the sidebar for as long as a user has not pinned any models themselves | [`DEFAULT_PINNED_MODELS`](/reference/env-configuration#default_pinned_models) |
 
 Both accept more than one model, so you can hand users a small starting set rather than a single model.
 
@@ -262,7 +262,13 @@ For a new chat, Open WebUI takes the first of these that yields a model the user
 
 Models that have been hidden or removed are dropped at every step, so a user whose last-used model disappeared lands on a working one instead of an empty selector.
 
-**Pinned Models** work differently: they seed the user's sidebar shortcuts once, only when the user has no pinned models of their own. From then on the user's own pins win, and pins pointing at hidden or deleted models are cleaned up automatically.
+**Pinned Models** work differently: they are resolved for display only. The admin list fills the sidebar shortcuts for as long as the user has no pins of their own, and nothing is written to their settings until they pin, unpin or reorder something. From that point their own pins win for good, including an empty list if they unpin everything, which stays empty rather than falling back to the default. Pins pointing at hidden or deleted models are cleaned up automatically.
+
+:::warning Accounts from before this change keep an overwritten copy
+Earlier versions copied the admin list into each user's own settings the first time the sidebar rendered, and saved it. That marked the account as having chosen those pins, so later changes to **Pinned Models** never reached it. Merely loading the page was enough, the user never had to touch a pin.
+
+Those accounts keep the copy. A stored pin list cannot be told apart from a deliberate one, so the only way to hand one back to the default is to clear `pinnedModels` on that user's settings.
+:::
 
 :::warning Selected is a starting point, not a restriction
 Setting a model as Selected does not stop anyone from switching to another model they have access to. To control what a user can reach, use per-model access control or **Hide**, described in [Curated-Interface Deployments](#curated-interface-deployments).
