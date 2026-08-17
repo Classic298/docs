@@ -109,7 +109,7 @@ Click the small **+** button next to the **Calendars** heading in the calendar s
 2. Fill in the event details:
    - **Title** (required)
    - **Calendar**: which calendar to add the event to
-   - **When**: date and time, or toggle **All day**
+   - **When**: date and time, or toggle **All day**. The date is required, and clearing it is refused with **Date is required** rather than saving
    - **Location** (optional)
    - **Repeat**: how often the event comes back, see [Recurring Events](#recurring-events)
    - **Description** (optional)

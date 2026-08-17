@@ -71,6 +71,17 @@ curl -X POST -H "Authorization: Bearer YOUR_API_KEY" \
 
 This gives reproducible, version-controlled model definitions. Use `/import` instead of `/sync` for additive updates that never delete existing models. Run the sync step on deploy, in CI or at container startup to load your models automatically.
 
+:::warning Gate automation on the response body, not the status code
+`sync` answers `200` with the reconciled catalogue, but an internal failure is also reported as `200` with an empty array rather than a `5xx`, leaving only a traceback in the server log. A pipeline that checks the exit status alone will pass on a complete no-op, so compare the number of models returned against the number you sent:
+
+```bash
+curl -s -X POST -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"models\": $(cat models.json)}" \
+  http://localhost:3000/api/v1/models/sync | jq 'length'
+```
+:::
+
 ### 💬 Chat Completions
 
 - **Endpoint**: `POST /api/chat/completions`
