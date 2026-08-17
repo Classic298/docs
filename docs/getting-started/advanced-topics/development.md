@@ -58,6 +58,15 @@ npm run dev
 
 `npm run build` compiles the frontend and catches build-time errors early. `npm run dev` then starts the dev server at [http://localhost:5173](http://localhost:5173). It will show a waiting screen until the backend is running.
 
+The dev server also proxies the app's API traffic to the backend, `/api`, `/ollama`, `/openai`, `/oauth` and the `/ws` socket included, so the browser only ever talks to `localhost:5173`. It forwards to `http://localhost:8080` unless you point it somewhere else with `WEBUI_BACKEND_URL`:
+
+```bash
+export WEBUI_BACKEND_URL="http://192.168.1.42:8080"
+npm run dev
+```
+
+That variable is read from the shell when the dev server starts, not from `.env`, so set it before `npm run dev` and restart the dev server after changing it.
+
 :::tip
 If `npm install` fails with compatibility warnings, run `npm install --force`.
 :::
@@ -102,13 +111,9 @@ Refresh the frontend at [http://localhost:5173](http://localhost:5173) and you s
 To access your dev instance from a phone or another computer on the same network:
 
 1. Find your machine's LAN IP (e.g., `192.168.1.42`)
-2. Add the origin to CORS in `backend/dev.sh`:
+2. Browse to `http://192.168.1.42:5173`
 
-```bash
-export CORS_ALLOW_ORIGIN="http://localhost:5173;http://localhost:8080;http://192.168.1.42:5173"
-```
-
-3. Restart the backend and browse to `http://192.168.1.42:5173`
+The dev server already listens on every interface, and the browser talks only to it rather than to the backend directly, so the device's origin does not have to be added to `CORS_ALLOW_ORIGIN` and the backend does not need restarting.
 
 ---
 
