@@ -762,7 +762,7 @@ On reaching the cap, Open WebUI emits a **`Tool-call limit reached (N iterations
 
 - Type: `bool`
 - Default: `False`
-- Description: Bypasses model access control. When set to `true`, all users (and admins alike) will have access to all models, regardless of the model's privacy setting (Private, Public, Shared with certain groups). This is useful for smaller or individual Open WebUI installations where model access restrictions may not be needed.
+- Description: Bypasses model access control. When set to `true`, all users (and admins alike) will have access to all models, regardless of the model's privacy setting (Private, Public, Shared with certain groups). This is useful for smaller or individual Open WebUI installations where model access restrictions may not be needed. It governs which models a user may reach, not which backend serves them: on a proxied route that takes a connection index, the index a non-admin supplies must still be one that actually serves the requested model, and this setting does not waive that check.
 
 #### `BYPASS_RETRIEVAL_ACCESS_CONTROL`
 

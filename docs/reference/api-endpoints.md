@@ -472,7 +472,7 @@ curl -X POST http://localhost:3000/ollama/v1/embeddings \
 }'
 ```
 
-A specific backend can be targeted with `/ollama/v1/embeddings/{url_idx}`. The endpoint returns `503` if the Ollama integration is disabled.
+A specific backend can be targeted with `/ollama/v1/embeddings/{url_idx}`. For a non-admin caller that index has to be one that actually serves the model, otherwise the request is refused with `403`; an admin can target any index. The endpoint returns `503` if the Ollama integration is disabled.
 
 ### 🧩 Retrieval Augmented Generation (RAG)
 
