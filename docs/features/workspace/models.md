@@ -264,10 +264,8 @@ Models that have been hidden or removed are dropped at every step, so a user who
 
 **Pinned Models** work differently: they are resolved for display only. The admin list fills the sidebar shortcuts for as long as the user has no pins of their own, and nothing is written to their settings until they pin, unpin or reorder something. From that point their own pins win for good, including an empty list if they unpin everything, which stays empty rather than falling back to the default. Pins pointing at hidden or deleted models are cleaned up automatically.
 
-:::warning Accounts from before this change keep an overwritten copy
-Earlier versions copied the admin list into each user's own settings the first time the sidebar rendered, and saved it. That marked the account as having chosen those pins, so later changes to **Pinned Models** never reached it. Merely loading the page was enough, the user never had to touch a pin.
-
-Those accounts keep the copy. A stored pin list cannot be told apart from a deliberate one, so the only way to hand one back to the default is to clear `pinnedModels` on that user's settings.
+:::warning Some accounts hold a pin list nobody chose
+An account can carry its own copy of the default without anyone having pinned anything, and changes to **Pinned Models** do not reach it while it does. A stored pin list cannot be told apart from a deliberate one, so the only way to hand such an account back to the default is to clear `pinnedModels` on that user's settings.
 :::
 
 :::warning Selected is a starting point, not a restriction
