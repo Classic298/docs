@@ -91,7 +91,7 @@ Navigate to **Workspace > Skills** and click **Create** in the Workspace header.
 | Field | Description |
 | :--- | :--- |
 | **Name** | Human-readable display name (e.g., "Code Review Guidelines") |
-| **Skill ID** | Unique slug, auto-generated from the name. Editable during creation, read-only afterwards |
+| **Skill ID** | Unique slug, auto-generated from the name. Editable during creation, read-only afterwards. Only lowercase letters, digits, `-` and `_` are accepted: an ID containing anything else is refused with a `400` rather than stored, so a skill created over the API needs one that fits |
 | **Description** | Short summary shown in the manifest. For model-attached skills, the model uses this to decide whether to load the full instructions |
 | **Content** | Full skill instructions in Markdown |
 

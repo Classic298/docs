@@ -294,6 +294,8 @@ When `ENABLE_OAUTH_GROUP_MANAGEMENT` is set to `true`, a user's group membership
 
 Ensure all necessary groups are correctly configured in your OAuth provider and included in the group claim (`OAUTH_GROUP_CLAIM`).
 
+Each membership the sync adds or removes, and each group `ENABLE_OAUTH_GROUP_CREATION` creates, emits an event carrying `source: 'oauth'`, so the login path is visible to [Event functions](/features/extensibility/plugin/functions/event) and to anything auditing group membership.
+
 :::
 
 :::warning
