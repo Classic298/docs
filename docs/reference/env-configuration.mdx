@@ -4514,7 +4514,7 @@ This Tenant ID (also known as Directory ID) is required for the work/school inte
 
 - Type: `bool`
 - Default: `True`
-- Description: Routes the web-page content fetcher (the stage that scrapes result pages after a web search, and the general website/URL loader) through the proxy defined by the http_proxy / https_proxy environment variables, also honoring no_proxy and .netrc. Needed because the default fetcher uses aiohttp, which, unlike requests, ignores these proxy variables unless told to trust the environment. This does not affect the search-engine query request itself (that already respects proxy env vars), and it never overrides an explicitly configured proxy; for the Firecrawl/Tavily/Playwright loaders it only acts as a fallback when no proxy is otherwise set.
+- Description: Routes the web-page content fetcher (the stage that scrapes result pages after a web search, and the general website/URL loader) through the proxy defined by the http_proxy / https_proxy environment variables, also honoring no_proxy and .netrc. Needed because the default fetcher uses aiohttp, which, unlike requests, ignores these proxy variables unless told to trust the environment. This does not affect the search-engine query request itself (that already respects proxy env vars), and it never overrides an explicitly configured proxy; for the Firecrawl and Tavily loaders it only acts as a fallback when no proxy is otherwise set. The Playwright loader is no longer one of those: it issues the page's requests from the backend rather than from the browser, so this setting governs their proxy directly and the browser's own proxy override does not reach them.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `WEB_FETCH_FILTER_LIST`
@@ -5071,6 +5071,10 @@ When using `playwright`, you have two options:
 - Default: `None`
 - Description: Specifies the WebSocket URI of a remote Playwright browser instance. When set, Open WebUI will use this remote browser instead of installing browser dependencies locally. This is particularly useful in containerized environments where you want to keep the Open WebUI container lightweight and separate browser concerns. Example: `ws://playwright:3000`
 - Persistence: This environment variable is a `ConfigVar` variable.
+
+:::info The page's own requests come from Open WebUI, not the browser
+The loader intercepts everything the page asks for and fetches it through Open WebUI's own HTTP clients, then hands the result back to the browser. With a remote browser this means the traffic leaves from the Open WebUI host rather than the browser host, so egress rules, allowlists and outbound proxies have to permit the former. It also means those requests are verified against `certifi` and [`AIOHTTP_CLIENT_SSL_CERT_FILE`](#aiohttp_client_ssl_cert_file) rather than the browser image's own trust store, so a site behind an internal certificate authority needs that authority trusted here.
+:::
 
 :::tip
 

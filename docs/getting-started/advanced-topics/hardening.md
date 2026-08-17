@@ -557,6 +557,8 @@ AIOHTTP_CLIENT_ALLOW_REDIRECTS=false
 
 :::note Playwright loader (v0.9.6+)
 Earlier versions applied URL validation and the redirect gate only to the default web loader; the Playwright-based loader (`WEB_LOADER_ENGINE=playwright` / the `playwright` Docker variant) could navigate and follow redirects to internal or blocklisted URLs unchecked. As of v0.9.6 the Playwright path enforces the same `validate_url()` and redirect rules as the default loader, so the SSRF controls above apply regardless of which web loader engine you run. If you use Playwright, ensure you are on v0.9.6 or later.
+
+The loader also fetches everything the page requests through Open WebUI's own HTTP clients instead of letting the browser issue it, so each of those requests is validated and gated like any other outbound request, and they leave from the Open WebUI host even when `PLAYWRIGHT_WS_URL` points at a browser elsewhere. Write egress rules for that host rather than the browser's.
 :::
 
 ### Profile image URL forwarding
