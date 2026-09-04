@@ -216,6 +216,10 @@ Two things to know:
 
 Toggle between **Created by you** and **Shared with you** filters, and switch between **List** and **Grid** layouts.
 
+### Quick delete
+
+Hold **Shift** while the Notes list is open and every note's **⋯** menu button turns into a delete button. Clicking it deletes that note straight away, with no menu and no confirmation prompt. It works in both **List** and **Grid** layouts, and holding Shift closes any note menu that is already open. Release Shift, or click away from the window, and the menu button comes back. Without Shift nothing changes: delete still goes through the menu and asks you to confirm.
+
 :::info Admin Visibility
 Notes are workspace items. By default (`BYPASS_ADMIN_ACCESS_CONTROL=True`), administrators can see all users' notes. Set `BYPASS_ADMIN_ACCESS_CONTROL` to `False` to restrict this. See [Environment Configuration](/reference/env-configuration#bypass_admin_access_control) for details.
 :::
