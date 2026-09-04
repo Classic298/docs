@@ -9,6 +9,8 @@ Open WebUI translates its own interface into many languages, but the things you 
 
 Nothing is translated automatically. You write each version yourself, or import a file someone else prepared.
 
+Separately from that, admins can override Open WebUI's own interface wording, the buttons and labels the application ships with. That is [Interface text](#interface-text) at the bottom of this page.
+
 ---
 
 ## What can be translated
@@ -22,6 +24,7 @@ Nothing is translated automatically. You write each version yourself, or import 
 | **Banners** | Content, not the title | Settings > Admin > System > General, next to the Banners heading |
 | **Arena models** | Name, description | Settings > Admin > Evaluations, in the arena model dialog |
 | **Default prompt suggestions** | The suggestions themselves | Settings > Admin > Models > Model Defaults |
+| **Open WebUI's own interface** | Any string the application ships | Settings > Admin > System > General, under UI Translations. See [Interface text](#interface-text) |
 
 ---
 
@@ -93,6 +96,35 @@ Banner content is translated from **Settings > Admin > System > General**, with 
 ![A banner being edited in German, with the language selector next to the Banners heading](/images/features/translations/banner-translations.png)
 
 This replaces the older habit of putting several languages into one banner. Writing them as translations means each user reads one message in their own language instead of a stack of them. See [Banners](/features/administration/banners).
+
+---
+
+## Interface text
+
+Everything above is about the things you create. This one is about Open WebUI's own wording: the buttons, labels and messages the application ships with.
+
+Open **Settings > Admin > System > General** and find **UI Translations**. Each row is a pair: on the left the original English string exactly as the application uses it, on the right what you want shown instead. The selector picks which language the right-hand column belongs to, and it starts on the language you are currently reading the interface in.
+
+The overrides are merged over the language files Open WebUI ships. Anything you override wins, everything you leave alone keeps the shipped wording, so you never have to supply a whole catalogue to change one word.
+
+English counts as a language here, which makes this the way to rename things for everyone: put `Knowledge` on the left, `Library` on the right, save it under English, and the whole interface says Library.
+
+**The left-hand side has to match the original string exactly**, including capitals and punctuation. It is the key the application looks up, so a near miss simply never matches and nothing changes.
+
+A few rules are enforced when you save, and a save that breaks one is refused with the offending entry named:
+
+- The replacement has to be text. A blank one is dropped, which is how you remove an override.
+- Any `{{ placeholder }}` in the original has to appear in the replacement too, so a rewritten string cannot lose the value that gets substituted into it.
+- The same original text cannot appear in two rows.
+- `__proto__`, `prototype` and `constructor` are refused as a language or an original string.
+
+Your own session updates the moment you save. Everyone else picks the change up the next time their browser loads Open WebUI.
+
+### Setting it through the API
+
+The overrides live in the admin config as `I18N`, a map of language to a map of original string to replacement, sent to `POST /api/v1/auths/admin/config` and readable from `/api/config` as `i18n`. The same rules are enforced there.
+
+Leaving `I18N` out of the request keeps whatever is stored, so an integration that writes other admin settings will not wipe the overrides by accident. Sending `{}` clears them.
 
 ---
 
