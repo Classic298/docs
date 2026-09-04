@@ -47,8 +47,7 @@ You can configure the following options for each banner:
   - `success` (Green)
   - `warning` (Yellow)
   - `error` (Red)
-- **Title:** The main heading of the banner.
-- **Content:** The main message (HTML only).
+- **Content:** The main message (HTML only). There is no separate title field, put the heading at the start of the content.
 - **Dismissible:** If enabled, users can close the banner.
 
 The globe selector next to the **Banners** heading stores the content per language, so each user reads the banner in the language their interface is set to. See [Translations](/features/administration/translations#banners).
@@ -96,7 +95,7 @@ Each banner object supports the following properties:
 
 - `id` (string, required): Unique identifier for the banner. Used to track whether a user has dismissed it.
 - `type` (string, required): Banner style. Must be one of: `info`, `success`, `warning`, `error`.
-- `title` (string, optional): Title text.
+- `title` (string, optional): Accepted and stored, but never displayed. The interface renders `content` only, so anything you put here is invisible.
 - `content` (string, required): Main banner message (HTML only).
 - `dismissible` (boolean, required): Whether the user can dismiss the banner.
 - `timestamp` (integer, required): Present in configuration, but currently not used by the frontend to control display timing.
@@ -116,7 +115,7 @@ If users dismissed a banner and you want them to see an updated message, change 
 
 ## Supported content formatting (HTML only)
 
-Banner `title` and `content` support a subset of **HTML only**: Markdown syntax is not rendered. Unsupported tags may render as plain text or break the layout.
+Banner `content` supports a subset of **HTML only**: Markdown syntax is not rendered. Unsupported tags may render as plain text or break the layout.
 
 ### Text formatting
 

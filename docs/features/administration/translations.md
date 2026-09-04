@@ -29,11 +29,13 @@ Nothing is translated automatically. You write each version yourself, or import 
 
 Every editor that supports this has a globe selector. It starts on **Default**, which is the original text, and picking a language switches the editor over to that language: the fields now hold the translated text and show the original as placeholder text. Switch back to **Default** to edit the original again.
 
-English (`en-US`) is not in the list. It is the original, which is what the plain fields hold when the selector is on **Default**.
+Every language Open WebUI ships is offered, English included. **Default** is not a language, it is the original text, and that is what the plain fields hold. Picking `en-US` stores an English translation that English readers see instead of the original, which is usually not what you want: leave English on **Default** unless you deliberately want a separate wording for it.
 
 In the resource editors, a language that already carries text is marked with `*`, so you can see at a glance what has been translated.
 
 Under each translated field you get **Translated** or **Using default**, plus two buttons: **Copy default** drops the original in as a starting point, and **Use default** clears the translation so the original is used again.
+
+![A model editor switched to German, with a translated name, description and prompt suggestions](/images/features/translations/model-editor-translations.png)
 
 ---
 
@@ -56,6 +58,8 @@ Translated text follows the resource everywhere it is named: model and tool pick
 Tools and functions carry [valves](/features/extensibility/plugin/development/valves), the settings an admin or a user fills in. Their labels can be translated too, which matters most for user valves, since those are the ones ordinary users see in **Chat Controls**.
 
 Pick a language in a tool or function editor and the code editor is replaced by a translation table listing every label the plugin exposes, both admin valves and user valves. Each row shows the key, the original text and a box for your version, with an arrow button to clear that row back to the original.
+
+![The valve translation table in a tool editor, with keys, original text and German translations](/images/features/translations/tool-valve-translations.png)
 
 Keys follow the shape of the valve they belong to:
 
@@ -85,6 +89,8 @@ The table also has a search box and a **Modified** filter for showing only rows 
 ## Banners
 
 Banner content is translated from **Settings > Admin > System > General**, with the same globe selector next to the **Banners** heading. Each banner keeps its original content and a version per language, and a user is shown the one matching their interface language.
+
+![A banner being edited in German, with the language selector next to the Banners heading](/images/features/translations/banner-translations.png)
 
 This replaces the older habit of putting several languages into one banner. Writing them as translations means each user reads one message in their own language instead of a stack of them. See [Banners](/features/administration/banners).
 
