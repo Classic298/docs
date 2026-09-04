@@ -154,15 +154,9 @@ Clickable starter chips that appear when a user opens a fresh chat with this mod
 
 The name, the description and the prompt suggestions can each carry a version per language, so someone using Open WebUI in German sees a German model name and German starter chips while everyone else keeps the original text.
 
-Pick a language from the globe selector beside the model name and the editor switches to editing that language. The name field, the description and the prompt suggestions now hold the translated copy, with the original shown as placeholder text. **Copy default** drops the original into the field as a starting point, **Use default** removes the translation again so the original is used. Languages that already have something translated are marked with `*` in the selector. Switch back to **Default** to edit the original text.
+Pick a language from the globe selector beside the model name and the editor switches to editing that language, with the original shown as placeholder text. A user gets the version matching their own interface language, and the original wherever you have not translated anything.
 
-English (`en-US`) is not offered in the selector. It is the original text, which is what the plain **Name**, **Description** and **Prompt suggestions** fields hold.
-
-Which version a user gets follows their own interface language, in this order: the exact language (`de-DE`), then the base language (`de`), then the original text. A field left blank is dropped when you save, so an empty translation is the same as no translation and the original is used.
-
-Translated text follows the model everywhere it is named: the model selector, the new chat screen, the `@` and `/model` menus, the sidebar shortcuts, the replies themselves and the Workspace list.
-
-Admins get the same selector for the global prompt suggestions in **Settings > Admin > Models > Model Defaults**, so the fallback chips can be translated as well.
+The same works for tools, skills, functions, banners and arena models. See [Translations](/features/administration/translations) for the full picture, including how to translate valve labels.
 
 ---
 

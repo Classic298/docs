@@ -95,6 +95,8 @@ Navigate to **Workspace > Skills** and click **Create** in the Workspace header.
 | **Description** | Short summary shown in the manifest. For model-attached skills, the model uses this to decide whether to load the full instructions |
 | **Content** | Full skill instructions in Markdown |
 
+The globe selector beside the name translates the **Name** and **Description** per language, so a skill reads in the user's own language wherever it is listed. See [Translations](/features/administration/translations).
+
 ### Importing from Markdown
 
 Click **Import** and select a `.md` file. If the file contains YAML frontmatter with `name` and/or `description` fields, those values are auto-populated:
