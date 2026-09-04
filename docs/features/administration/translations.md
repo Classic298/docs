@@ -19,7 +19,7 @@ Nothing is translated automatically. You write each version yourself, or import 
 | **Tools** | Name, description, valve labels | Workspace > Tools, in the tool editor |
 | **Skills** | Name, description | Workspace > Skills, in the skill editor |
 | **Functions** | Name, description, valve labels, per-action labels | Settings > Admin > Functions, in the function editor |
-| **Banners** | Content | Settings > Admin > System > General, next to the Banners heading |
+| **Banners** | Content, not the title | Settings > Admin > System > General, next to the Banners heading |
 | **Arena models** | Name, description | Settings > Admin > Evaluations, in the arena model dialog |
 | **Default prompt suggestions** | The suggestions themselves | Settings > Admin > Models > Model Defaults |
 
@@ -64,7 +64,7 @@ Keys follow the shape of the valve they belong to:
 | `valves.<field>.title` | The label of an admin valve |
 | `valves.<field>.description` | Its help text |
 | `valves.<field>.enum.<value>` | One option of a dropdown valve |
-| `user_valves.<field>.title` | The same, for a user valve |
+| `user_valves.<field>.` | The same three shapes again, for a user valve |
 | `actions.<action_id>.name` | The label of one action a function exposes |
 | `actions.<action_id>.description` | That action's tooltip |
 
