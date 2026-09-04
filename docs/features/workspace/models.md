@@ -58,6 +58,7 @@ Use Jinja2-style variables like `{{ USER_NAME }}` and `{{ CURRENT_DATE }}` so th
 | 👥 **Access control** | Restrict to specific users or groups |
 | 📊 **Global defaults** | Set baseline capabilities and parameters for all models at once |
 | 🔊 **Per-model TTS voice** | Give each persona its own voice |
+| 🌐 **Translations** | Per-language name, description and prompt suggestions |
 
 ---
 
@@ -75,6 +76,7 @@ Click **Create** in the **Workspace** header while the **Models** tab is selecte
 | **Description** | Short summary shown in the model selector |
 | **Tags** | Organize models in the dropdown |
 | **Visibility** | Private (specific users/groups) or public |
+| **Language** | The globe selector beside the name switches the editor to a translation of the name, description and prompt suggestions. See [Translations](#translations) |
 
 ![The model editor with base model, description and system prompt](/images/workspace/model-editor.png)
 
@@ -146,7 +148,21 @@ What you set here applies to every chat that does not set the same parameter its
 
 ### Prompt suggestions
 
-Clickable starter chips that appear when a user opens a fresh chat with this model. Add phrases like "Explain this code step-by-step" or "Summarize this document" to guide users.
+Clickable starter chips that appear when a user opens a fresh chat with this model. Add phrases like "Explain this code step-by-step" or "Summarize this document" to guide users. They can be translated per language, see below.
+
+### Translations
+
+The name, the description and the prompt suggestions can each carry a version per language, so someone using Open WebUI in German sees a German model name and German starter chips while everyone else keeps the original text.
+
+Pick a language from the globe selector beside the model name and the editor switches to editing that language. The name field, the description and the prompt suggestions now hold the translated copy, with the original shown as placeholder text. **Copy default** drops the original into the field as a starting point, **Use default** removes the translation again so the original is used. Languages that already have something translated are marked with `*` in the selector. Switch back to **Default** to edit the original text.
+
+English (`en-US`) is not offered in the selector. It is the original text, which is what the plain **Name**, **Description** and **Prompt suggestions** fields hold.
+
+Which version a user gets follows their own interface language, in this order: the exact language (`de-DE`), then the base language (`de`), then the original text. A field left blank is dropped when you save, so an empty translation is the same as no translation and the original is used.
+
+Translated text follows the model everywhere it is named: the model selector, the new chat screen, the `@` and `/model` menus, the sidebar shortcuts, the replies themselves and the Workspace list.
+
+Admins get the same selector for the global prompt suggestions in **Settings > Admin > Models > Model Defaults**, so the fallback chips can be translated as well.
 
 ---
 
@@ -190,6 +206,7 @@ Administrators can set baseline capabilities and parameters that apply to all mo
 
 - **Default Model Metadata** (`DEFAULT_MODEL_METADATA`): Baseline capabilities (vision, web search, file context, code interpreter, builtin tools). Per-model overrides always win on conflicts.
 - **Default Model Params** (`DEFAULT_MODEL_PARAMS`): Baseline inference parameters (temperature, top_p, max_tokens, function_calling). Per-model values take precedence when explicitly set. This value is loaded from the environment as JSON; invalid JSON is ignored and falls back to `{}`.
+- **Prompt suggestions**: the starter chips shown when a model has none of its own. The globe selector translates them per language, the same way a model's own suggestions are translated. See [Translations](#translations).
 
 These cover chat completions. Background task requests (titles, tags, follow-ups, search queries, autocomplete, context compaction summaries) do not go through them; their parameters are set separately, in [Task Models](/features/administration/task-models).
 
