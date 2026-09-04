@@ -107,6 +107,16 @@ Open **Settings > Admin > System > General** and find **UI Translations**. Each 
 
 The overrides are merged over the language files Open WebUI ships. Anything you override wins, everything you leave alone keeps the shipped wording, so you never have to supply a whole catalogue to change one word.
 
+![The UI Translations panel with three interface strings replaced](/images/features/translations/ui-translations.png)
+
+The result, on the interface itself:
+
+![The sidebar showing the replaced labels](/images/features/translations/ui-translations-effect.png)
+
+:::warning The language has to match exactly
+This part does not fall back the way resource translations do. An override stored under `en-US` does nothing for someone reading the interface in `en-GB`, and one stored under `de` does nothing for `de-DE`. Store the override under every language code your users actually run, or the change silently does not appear.
+:::
+
 English counts as a language here, which makes this the way to rename things for everyone: put `Knowledge` on the left, `Library` on the right, save it under English, and the whole interface says Library.
 
 **The left-hand side has to match the original string exactly**, including capitals and punctuation. It is the key the application looks up, so a near miss simply never matches and nothing changes.
