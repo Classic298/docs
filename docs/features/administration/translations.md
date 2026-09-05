@@ -36,7 +36,7 @@ Every language Open WebUI ships is offered, English included. **Default** is not
 
 In the resource editors, a language that already carries text is marked with `*`, so you can see at a glance what has been translated.
 
-Under each translated field you get **Translated** or **Using default**, plus two buttons: **Copy default** drops the original in as a starting point, and **Use default** clears the translation so the original is used again.
+In the model editor, the banner list and the arena dialog, a translated field carries two small buttons: **Copy default** drops the original in as a starting point, and **Use default** clears the translation so the original is used again. Tool and skill names and descriptions have no buttons, just type in the field, and empty it again to go back to the original.
 
 ![A model editor switched to German, with a translated name, description and prompt suggestions](/images/features/translations/model-editor-translations.png)
 
