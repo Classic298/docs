@@ -178,6 +178,10 @@ When the AI creates or changes files, the file browser refreshes automatically. 
 The file browser remembers which folder you were in, even when you switch between chats or terminals.
 :::
 
+:::tip The terminal sits below it
+The bottom of the same sidebar holds the [terminal pane](./terminal-pane.md): your own shell, plus a tab per command the AI runs.
+:::
+
 :::tip Multiple terminals
 If you have more than one terminal connected, switching between them in the dropdown updates the file browser to show that terminal's files.
 :::
