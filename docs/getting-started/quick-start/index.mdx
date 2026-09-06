@@ -54,7 +54,7 @@ docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-
     <tr>
       <td><code>:main-slim</code></td>
       <td>You want a smaller download.</td>
-      <td>The smaller image. Chatting with a hosted model works the same as on <code>:main</code> and needs nothing extra. Documents, voice and the local embedding, speech and reranking models are not built in, so those features need a service you point it at. Today <code>:main-slim</code> is still the older build that only leaves the model files out and downloads them on first use; the version that drops the whole local stack is on <code>:dev-slim</code> until the next release. <Link to="/getting-started/quick-start/install-methods/docker-images#what-slim-leaves-out">What slim leaves out</Link></td>
+      <td>The smaller image. Chatting with a hosted model works the same as on <code>:main</code> and needs nothing extra. Documents, voice and the local embedding, speech and reranking models are not built in, so those features need a service you point it at. <Link to="/getting-started/quick-start/install-methods/docker-images#what-slim-leaves-out">What slim leaves out</Link></td>
     </tr>
   </tbody>
 </table>

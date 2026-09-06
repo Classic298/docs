@@ -22,13 +22,9 @@ Channel and variant combine: `:dev-slim`, `:dev-cuda`, `:dev-cuda126` and `:dev-
 
 ### What slim leaves out
 
-Slim used to be the standard image with the model files left out. It is now an image with the local machine-learning stack removed: no `torch`, no `sentence-transformers`, no `transformers`, no `faster-whisper`, no `unstructured`, no embedded `chromadb`, and no `ffmpeg`, `pandoc` or build toolchain in the base system. Roughly two dozen Python packages are gone, which is where the size saving comes from.
+Slim is the standard image with the local machine-learning stack removed: no `torch`, no `sentence-transformers`, no `transformers`, no `faster-whisper`, no `unstructured`, no embedded `chromadb`, and no `ffmpeg`, `pandoc` or build toolchain in the base system. Roughly two dozen Python packages are gone, `torch` among them, which is where the size saving comes from.
 
 **Nothing extra is required to run it.** It starts on its own and chatting works exactly as it does on `:main`, with the model provider you were going to configure anyway. What changes is that the work slim can no longer do itself has to come from a service you point it at, and only for the features you actually use.
-
-:::warning Which images have this
-This landed after **v0.11.3**, so it is what `:dev-slim` builds today and what the next release will carry. `:main-slim`, `:slim` and the released `X.Y.Z-slim` tags are still the old slim, the same packages as `:main` with the models left to download on first use, until that release lands.
-:::
 
 #### What each feature needs
 
@@ -58,13 +54,7 @@ If you use Open WebUI as a chat front end for hosted models, none of the above a
 
 #### Offline and air-gapped
 
-The old slim downloaded models on first use, so an air-gapped deployment had to preload them or switch the local engines off. The new slim never downloads a model, because it cannot run one. What it needs instead is that whichever services you use are reachable on your own network. `OFFLINE_MODE=true` still blocks the Hugging Face traffic and the version check.
-
-### How much it saves
-
-The new slim is substantially smaller than `:main`, since `torch` alone accounts for a large part of that image, but the exact figure moves with every dependency bump and is not quoted here.
-
-For the old slim, still what `:main-slim` gives you today, the amd64 download is roughly 1.8 GB against 1.5 GB, about 0.3 GB on disk, and the bandwidth saving only holds if the models never get downloaded. With default settings that image pulls the embedding model at first start and Whisper on the first local speech-to-text request, so the total transfer ends up about the same as `:main`. Starting it with `OFFLINE_MODE=true` keeps the downloads at zero, and document upload and RAG then fail until **Settings > Admin > Documents** points **Embedding Model Engine** at Ollama, OpenAI or Azure OpenAI. If your volume already holds the models from an earlier `:main` run, that slim costs you nothing either.
+Slim never downloads a model, because it cannot run one. An air-gapped deployment only has to reach whichever services it uses on your own network. `OFFLINE_MODE=true` still blocks the Hugging Face traffic and the version check.
 
 ### How the tags update
 
