@@ -48,7 +48,7 @@ Neither matters on a default install, which is SQLite and local files. They matt
 | **Reranking** | An external reranker | Selecting a local reranking model is refused |
 | **Code interpreter** | Nothing, but the browser fetches the Python packages from `cdn.jsdelivr.net` rather than from your instance | Running code fails where the browser cannot reach that CDN |
 
-Also unavailable: the **Playwright** web loader, so pages are fetched over plain HTTP or by an external web loader, and the **Transformers** text splitter, so use the character or the tiktoken token splitter.
+Also unavailable: the **Playwright** web loader, so pages are fetched over plain HTTP or by an external web loader, and the **Transformers** text splitter, so use the character or the tiktoken token splitter. Slim carries no `git` either, so a tool or function whose requirements install straight from a repository needs the standard image.
 
 If you use Open WebUI as a chat front end for hosted models, none of the above applies and slim is simply the smaller image.
 
