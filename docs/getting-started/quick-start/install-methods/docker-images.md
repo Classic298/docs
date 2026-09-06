@@ -13,7 +13,7 @@ All images are published to `ghcr.io/open-webui/open-webui`. The [Quick Start](/
 |-----|----------|
 | `:main` | Standard image (recommended). Everything included: the app plus the bundled speech-to-text and embedding models. |
 | `:dev` | Pre-release (nightly) build from the `dev` branch. Fixes and features arrive here first. See [Using the Dev Branch](#using-the-dev-branch). |
-| `:main-slim` | Smaller image without the pre-downloaded models, see [What slim leaves out](#what-slim-leaves-out) |
+| `:main-slim` | Smaller image with the local machine-learning stack removed, see [What slim leaves out](#what-slim-leaves-out) |
 | `:cuda` | Nvidia GPU support, CUDA 12.8 (add `--gpus all` to `docker run`) |
 | `:cuda126` | Same as `:cuda`, built against CUDA 12.6 |
 | `:ollama` | Bundles Ollama inside the container for an all-in-one setup |
@@ -22,24 +22,49 @@ Channel and variant combine: `:dev-slim`, `:dev-cuda`, `:dev-cuda126` and `:dev-
 
 ### What slim leaves out
 
-The slim image is the standard image without the pre-downloaded model files. The Python packages, ffmpeg and pandoc are identical, and on the amd64 build the download shrinks from roughly 1.8 GB to 1.5 GB.
+Slim used to be the standard image with the model files left out. It is now an image with the local machine-learning stack removed: no `torch`, no `sentence-transformers`, no `transformers`, no `faster-whisper`, no `unstructured`, no embedded `chromadb`, and no `ffmpeg`, `pandoc` or build toolchain in the base system. Roughly two dozen Python packages are gone, which is where the size saving comes from.
 
-| Left out | Downloaded when |
-|---|---|
-| RAG embedding model `sentence-transformers/all-MiniLM-L6-v2` | **First start** (it is loaded at boot), from Hugging Face |
-| Speech-to-text model `faster-whisper` `base` | First local speech-to-text request, from Hugging Face |
-| Auxiliary embedding model `TaylorAI/bge-micro-v2` | First leaderboard search, from Hugging Face |
-| `tiktoken` `cl100k_base` encoding | When the token text splitter is selected, from OpenAI |
+**Nothing extra is required to run it.** It starts on its own and chatting works exactly as it does on `:main`, with the model provider you were going to configure anyway. What changes is that the work slim can no longer do itself has to come from a service you point it at, and only for the features you actually use.
 
-So slim reaches out to the internet on first start and again on first use of local speech-to-text. Offline, air-gapped, behind a proxy that blocks Hugging Face, or with `OFFLINE_MODE=true`, it still works, as long as the default local embedding engine is not in use: set `RAG_EMBEDDING_ENGINE` to `ollama`, `openai` or `azure_openai` before the first start, or supply the model files yourself.
+:::warning Which images have this
+This landed after **v0.11.3**, so it is what `:dev-slim` builds today and what the next release will carry. `:main-slim`, `:slim` and the released `X.Y.Z-slim` tags are still the old slim, the same packages as `:main` with the models left to download on first use, until that release lands.
+:::
 
-Otherwise the container starts, but the first document upload or RAG query fails with `ValueError: No embedding model is loaded` (0.9.6 aborted startup instead, fixed in 0.10.0); switch `RAG_EMBEDDING_ENGINE` or supply the model files, see [Startup & Docker Failures](/troubleshooting/startup#valueerror-no-embedding-model-is-loaded-with-offline-mode-on-a-fresh-install).
+#### What each feature needs
 
-### When slim saves anything
+| If you want | Point slim at | Otherwise |
+|---|---|---|
+| **Documents, knowledge or RAG** | An embedding provider: `RAG_EMBEDDING_ENGINE` set to `ollama`, `openai` or `azure_openai` | Embedding calls fail with 503, and the admin panel refuses to save the local engine |
+| | Remote vector storage: `CHROMA_HTTP_HOST`, an `http`/`https`/`tcp` `MILVUS_URI`, `QDRANT_URI`, or a Postgres `PGVECTOR_DB_URL` | 503 the first time retrieval runs. Nothing else is affected, the store is only opened when it is used |
+| **PDFs and Office files** | Tika, Docling, an external extractor or a cloud engine | Uploading one returns 503. Plain text formats are still read by slim itself |
+| **Voice input** | Any external speech-to-text engine: OpenAI, Deepgram, Azure, Mistral and so on | Local Whisper is not offered, and the admin panel refuses to select it |
+| **Spoken replies** | Any external text-to-speech engine | The local Transformers voice is not offered, and requesting speech returns 503 |
+| **The Playwright web loader** | `PLAYWRIGHT_WS_URL` for a remote browser | Configuring Playwright without it is refused. The other web loaders are unaffected |
+| **Reranking** | An external reranker | Selecting a local reranking model is refused |
 
-The slim image is always about 0.3 GB smaller on disk. The bandwidth saving only holds if the models never get downloaded: with default settings slim pulls the embedding model into your volume at first start, and the first local speech-to-text request pulls Whisper, so the total transfer ends up about the same as `:main`. To keep the downloads at zero, start the container with `OFFLINE_MODE=true`. It blocks every Hugging Face download (the embedding models and Whisper) and the version check, and the container boots normally; document upload and RAG just fail until you open your avatar > **Settings > Admin > Documents** and set **Embedding Model Engine** to Ollama, OpenAI or Azure OpenAI. The change takes effect immediately, persists, and nothing is ever downloaded. Speech-to-text works the same way: pick an external engine in the admin settings, or leave it unused. Two things to leave alone: the `token` text splitter pulls the tiktoken encoding, which `OFFLINE_MODE` does not block, and leaderboard searches fail offline because they need the auxiliary embedding model.
+Also unavailable: the **Transformers** text splitter, so use the character or the tiktoken token splitter.
 
-If your data volume already holds the models from an earlier `:main` run, slim costs you nothing either.
+If you use Open WebUI as a chat front end for hosted models, none of the above applies and slim is simply the smaller image.
+
+#### What still works without a service
+
+- **Plain text extraction.** `csv`, `html`, `txt`, `md`, `markdown`, `rst`, `xml` and anything else detected as text are read by slim itself.
+- **Reranking, in a fashion.** Leave the reranking model empty and results are scored by cosine similarity against the embeddings you already have, which needs no model runtime.
+- **Audio passthrough.** Speech from an external provider is served in the format that provider returned, since slim cannot transcode. A provider that answers with something a browser cannot play is rejected rather than stored.
+
+#### Building it yourself
+
+`USE_SLIM=true` cannot be combined with `USE_CUDA=true` or `USE_OLLAMA=true`. The build stops with an error rather than producing an image whose GPU support or bundled model server has nothing to run.
+
+#### Offline and air-gapped
+
+The old slim downloaded models on first use, so an air-gapped deployment had to preload them or switch the local engines off. The new slim never downloads a model, because it cannot run one. What it needs instead is that whichever services you use are reachable on your own network. `OFFLINE_MODE=true` still blocks the Hugging Face traffic and the version check.
+
+### How much it saves
+
+The new slim is substantially smaller than `:main`, since `torch` alone accounts for a large part of that image, but the exact figure moves with every dependency bump and is not quoted here.
+
+For the old slim, still what `:main-slim` gives you today, the amd64 download is roughly 1.8 GB against 1.5 GB, about 0.3 GB on disk, and the bandwidth saving only holds if the models never get downloaded. With default settings that image pulls the embedding model at first start and Whisper on the first local speech-to-text request, so the total transfer ends up about the same as `:main`. Starting it with `OFFLINE_MODE=true` keeps the downloads at zero, and document upload and RAG then fail until **Settings > Admin > Documents** points **Embedding Model Engine** at Ollama, OpenAI or Azure OpenAI. If your volume already holds the models from an earlier `:main` run, that slim costs you nothing either.
 
 ### How the tags update
 
