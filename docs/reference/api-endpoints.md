@@ -308,6 +308,10 @@ The count is obtained from the upstream provider behind the resolved connection,
 The Messages API previously always reported `input_tokens: 0` in the streaming `message_start` block. Input tokens are now counted up front and reported in both streaming and non-streaming responses. If counting fails the request still succeeds, so clients should treat the value as best-effort rather than guaranteed.
 :::
 
+### 🗑️ Removed: `POST /api/v1/utils/pdf`
+
+The endpoint that rendered a chat to PDF server-side is gone, along with the fonts and the PDF library behind it. Nothing changes for people using Open WebUI: **Chat > Download > PDF** still works and always renders in the browser. Only a script calling that endpoint directly is affected, and there is no replacement endpoint for it.
+
 ### 🔧 Filter and Function Behavior with API Requests
 
 When using the API endpoints directly, filters (Functions) behave differently than when requests come from the web interface.

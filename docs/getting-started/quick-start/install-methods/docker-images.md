@@ -46,6 +46,7 @@ Neither matters on a default install, which is SQLite and local files. They matt
 | **Spoken replies** | Any external text-to-speech engine | The local Transformers voice is not offered, and requesting speech returns 503 |
 | **Web search** | Any provider other than DDGS | DDGS is greyed out in the admin panel and refused on save |
 | **Reranking** | An external reranker | Selecting a local reranking model is refused |
+| **Code interpreter** | Nothing, but the browser fetches the Python packages from `cdn.jsdelivr.net` rather than from your instance | Running code fails where the browser cannot reach that CDN |
 
 Also unavailable: the **Playwright** web loader, so pages are fetched over plain HTTP or by an external web loader, and the **Transformers** text splitter, so use the character or the tiktoken token splitter.
 
@@ -63,7 +64,9 @@ If you use Open WebUI as a chat front end for hosted models, none of the above a
 
 #### Offline and air-gapped
 
-Slim never downloads a model, because it cannot run one. An air-gapped deployment only has to reach whichever services it uses on your own network. `OFFLINE_MODE=true` still blocks the Hugging Face traffic and the version check.
+Slim never downloads a model, because it cannot run one, and an air-gapped deployment otherwise only has to reach whichever services it uses on your own network. `OFFLINE_MODE=true` still blocks the Hugging Face traffic and the version check.
+
+The one exception is the **code interpreter**. The standard image bundles the Python packages it runs; slim ships only the Pyodide runtime and points the package list at `cdn.jsdelivr.net`, so the browser pulls them from the internet on first use. Air-gapped instances should leave the code interpreter off, or use the standard image.
 
 ### How the tags update
 
