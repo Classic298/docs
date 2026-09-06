@@ -22,23 +22,32 @@ Channel and variant combine: `:dev-slim`, `:dev-cuda`, `:dev-cuda126` and `:dev-
 
 ### What slim leaves out
 
-Slim is the standard image with the local machine-learning stack removed: no `torch`, no `sentence-transformers`, no `transformers`, no `faster-whisper`, no `unstructured`, no embedded `chromadb`, and no `ffmpeg`, `pandoc` or build toolchain in the base system. Roughly two dozen Python packages are gone, `torch` among them, which is where the size saving comes from.
+Slim is the standard image with the local machine-learning stack removed: no `torch`, no `sentence-transformers`, no `transformers`, no `faster-whisper`, no `unstructured`, and no `ffmpeg`, `pandoc` or build toolchain in the base system. It also carries one client where the standard image carries many: PostgreSQL and pgvector for data and vectors, local files for storage, and no Playwright browser. Dozens of Python packages are gone, `torch` among them, which is where the size saving comes from.
 
 **Nothing extra is required to run it.** It starts on its own and chatting works exactly as it does on `:main`, with the model provider you were going to configure anyway. What changes is that the work slim can no longer do itself has to come from a service you point it at, and only for the features you actually use.
+
+#### What it will not start without
+
+Two settings are checked at boot, and slim refuses to start rather than failing later:
+
+- **The application database** has to be SQLite or PostgreSQL. MySQL, MariaDB and Oracle need the standard image, and so does AWS RDS IAM authentication.
+- **File storage** has to be local. S3, Azure Blob and Google Cloud Storage need the standard image.
+
+Neither matters on a default install, which is SQLite and local files. They matter when you move a standard-image deployment onto slim.
 
 #### What each feature needs
 
 | If you want | Point slim at | Otherwise |
 |---|---|---|
 | **Documents, knowledge or RAG** | An embedding provider: `RAG_EMBEDDING_ENGINE` set to `ollama`, `openai` or `azure_openai` | Embedding calls fail with 503, and the admin panel refuses to save the local engine |
-| | Remote vector storage: `CHROMA_HTTP_HOST`, an `http`/`https`/`tcp` `MILVUS_URI`, `QDRANT_URI`, or a Postgres `PGVECTOR_DB_URL` | 503 the first time retrieval runs. Nothing else is affected, the store is only opened when it is used |
+| | PostgreSQL with pgvector: `VECTOR_DB=pgvector` and `PGVECTOR_DB_URL`. It is the only vector store slim carries a client for | 503 the first time retrieval runs. Nothing else is affected, the store is only opened when it is used |
 | **PDFs and Office files** | Tika, Docling, an external extractor or a cloud engine | Uploading one returns 503. Plain text formats are still read by slim itself |
 | **Voice input** | Any external speech-to-text engine: OpenAI, Deepgram, Azure, Mistral and so on | Local Whisper is not offered, and the admin panel refuses to select it |
 | **Spoken replies** | Any external text-to-speech engine | The local Transformers voice is not offered, and requesting speech returns 503 |
-| **The Playwright web loader** | `PLAYWRIGHT_WS_URL` for a remote browser | Configuring Playwright without it is refused. The other web loaders are unaffected |
+| **Web search** | Any provider other than DDGS | DDGS is greyed out in the admin panel and refused on save |
 | **Reranking** | An external reranker | Selecting a local reranking model is refused |
 
-Also unavailable: the **Transformers** text splitter, so use the character or the tiktoken token splitter.
+Also unavailable: the **Playwright** web loader, so pages are fetched over plain HTTP or by an external web loader, and the **Transformers** text splitter, so use the character or the tiktoken token splitter.
 
 If you use Open WebUI as a chat front end for hosted models, none of the above applies and slim is simply the smaller image.
 

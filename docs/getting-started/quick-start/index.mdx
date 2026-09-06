@@ -54,7 +54,7 @@ docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-
     <tr>
       <td><code>:main-slim</code></td>
       <td>You want a small install, few dependencies, or Open WebUI as a front end only.</td>
-      <td>Ships no vector database, no embedding, speech or reranking models, and none of the heavy Python packages behind them. Chatting with a hosted model works the same as on <code>:main</code> and needs nothing extra; documents, voice and retrieval run on services you choose and configure yourself. <Link to="/getting-started/quick-start/install-methods/docker-images#what-slim-leaves-out">What slim leaves out</Link></td>
+      <td>Ships no embedding, speech or reranking models and none of the heavy Python packages behind them, and keeps one option per job: SQLite or PostgreSQL for data, pgvector for retrieval, local file storage. Chatting with a hosted model works the same as on <code>:main</code> and needs nothing extra; documents, voice and retrieval run on services you configure. <Link to="/getting-started/quick-start/install-methods/docker-images#what-slim-leaves-out">What slim leaves out</Link></td>
     </tr>
   </tbody>
 </table>
