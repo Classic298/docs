@@ -162,7 +162,8 @@ After the admin account is created, sign-up is automatically disabled for securi
 
 - Type: `bool`
 - Default: `True`
-- Description: Toggles email, password, sign-in and "or" (only when `ENABLE_OAUTH_SIGNUP` is set to True) elements.
+- Description: Shows the email and password fields, the sign-in button and the "or" divider (the divider only when `ENABLE_OAUTH_SIGNUP` is on) on the login page. Turning it off also refuses local sign-ups at `POST /api/v1/auths/signup`, so an SSO-only instance cannot create accounts that way; see [`ENABLE_INITIAL_ADMIN_SIGNUP`](#enable_initial_admin_signup) for bootstrapping the first administrator. Password sign-in through the API is unaffected, that one follows `ENABLE_PASSWORD_AUTH`. Set up SSO or LDAP before turning this off, or nobody can get in.
+- Also a toggle: **Login Form** in **Settings > Admin > Authentication**, which applies immediately and needs no restart.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `ENABLE_PASSWORD_CHANGE_FORM`

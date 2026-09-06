@@ -90,7 +90,7 @@ If all authentication is handled by an OAuth/OIDC provider, you can hide the loc
 ENABLE_LOGIN_FORM=false
 ```
 
-This removes the email/password form from the UI, steering all users through your SSO flow. You can also disable local password authentication at the backend level:
+This removes the email/password form from the UI and refuses local sign-ups, steering all users through your SSO flow. The same switch is **Login Form** in **Settings > Admin > Authentication**, so it can be turned off without a restart once SSO works. You can also disable local password authentication at the backend level:
 
 ```bash
 ENABLE_PASSWORD_AUTH=false
