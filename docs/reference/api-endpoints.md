@@ -308,6 +308,12 @@ The count is obtained from the upstream provider behind the resolved connection,
 The Messages API previously always reported `input_tokens: 0` in the streaming `message_start` block. Input tokens are now counted up front and reported in both streaming and non-streaming responses. If counting fails the request still succeeds, so clients should treat the value as best-effort rather than guaranteed.
 :::
 
+### ⚙️ `POST /api/v1/users/user/settings/update` patches, it does not replace
+
+The `ui` object in this request is applied field by field. A field you leave out keeps its current value, and a field sent as `null` is cleared, which drops the user back to the instance default for it. Sending a partial object is therefore the normal way to change one setting.
+
+A script that reads the settings, edits one key and posts the whole object back still works. One that posts a hand-written object expecting everything else to be wiped does not, since nothing it omits is removed any more.
+
 ### 🗑️ Removed: `POST /api/v1/utils/pdf`
 
 The endpoint that rendered a chat to PDF server-side is gone, along with the fonts and the PDF library behind it. Nothing changes for people using Open WebUI: **Chat > Download > PDF** still works and always renders in the browser. Only a script calling that endpoint directly is affected, and there is no replacement endpoint for it.

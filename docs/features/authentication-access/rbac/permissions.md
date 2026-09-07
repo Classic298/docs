@@ -181,7 +181,9 @@ Controls access to user settings areas.
 
 :::info Interface Settings Access and instance defaults
 
-Taking this permission away hides the **Interface** page and refuses any attempt to save personal settings, so the people affected stay on whatever [Default Interface Settings](/features/administration/interface-defaults) you have configured. Leave it on, and those defaults are only a starting point that each person can change. Admins are exempt.
+Taking this permission away hides the **Interface** page, so the people affected stay on whatever [Default Interface Settings](/features/administration/interface-defaults) you have configured. Leave it on, and those defaults are only a starting point that each person can change. Admins are exempt.
+
+A save that carries Interface fields anyway, from an older client or a script, is not rejected. The fields the Interface page owns are dropped and the rest of the request is saved, so losing this permission cannot block the settings a person is still allowed to change. **Allow Chat System Prompt** and **Allow Chat Params** work the same way: without them, that part of a save is dropped rather than the whole save failing.
 
 :::
 
