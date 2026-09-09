@@ -3642,7 +3642,7 @@ Valkey is **opt-in and not bundled**. Install the client manually (`pip install 
   - `3` - Tika 3.x
   - `4` - Tika 4.x
 - Default: `3`
-- Description: Tells Open WebUI which Apache Tika API to speak, since the two major versions differ in the endpoints they expose. Set this to match the server you are running, or extraction fails against an otherwise healthy Tika. It can also be changed from the Documents tab in the admin settings.
+- Description: Tells Open WebUI which Apache Tika API to speak, since the two major versions differ in the endpoints they expose. Set this to match the server you are running, or extraction fails against an otherwise healthy Tika. It can also be changed from the Documents tab in the admin settings. On `4`, documents come back as Markdown, so headings, lists and tables survive extraction instead of arriving as flat text.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `DOCLING_SERVER_URL`
@@ -4879,6 +4879,13 @@ Brave's free tier enforces a rate limit of 1 request per second. Open WebUI auto
 - Type: `str`
 - Default: `None`
 - Description: Sets the API key for Exa search API.
+- Persistence: This environment variable is a `ConfigVar` variable.
+
+#### `EXA_MAX_CONTENT_LENGTH`
+
+- Type: `int`
+- Default: `None` (the full text of every result is kept)
+- Description: Caps how many characters of page text Exa returns per result, which is the lever for keeping a wide search from filling the context window. Leave it unset for no limit. A value that is not a positive integer stops the server at startup rather than being ignored, so a typo here is loud instead of silent. The same setting sits in **Settings > Admin > Web Search** and appears once the engine is Exa.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `SERPAPI_API_KEY`

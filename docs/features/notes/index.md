@@ -205,6 +205,12 @@ Two things to know:
 * **Images uploaded from the menu are invisible.** They are stored on the note but are neither shown as a chip nor placed in the text. To get an image into the note, paste it into the editor, which inserts it where the cursor is. Dropping files onto a note does nothing in this release.
 * Attached files feed the note's chat. Every non-image attachment is added as retrieval context on every message you send in a chat opened from this note.
 
+### Formatting
+
+**Formatting** in the **More (...)** menu decides whether the editor formats as you type and paste. It is on, and needs write access to change.
+
+Turn it off and Markdown characters stay as characters, a pasted URL stays text rather than becoming a link, and pasting brings the plain text without the source's styling. Anything already formatted in the note stays formatted, so this changes what happens next instead of stripping what is there.
+
 ### Quick creation
 
 * Navigate to `/notes/new` to open a blank note
