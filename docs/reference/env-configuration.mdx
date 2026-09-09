@@ -7905,7 +7905,7 @@ Like the page cache above, the mmap window is established **per connection**. It
 #### `REDIS_URL`
 
 - Type: `str`
-- Description: Specifies the URL of the Redis instance or cluster host for storing application state.
+- Description: Specifies the URL of the Redis instance or cluster host for storing application state. A Redis-protocol server such as [Valkey](/tutorials/integrations/valkey) or Dragonfly should work in its place, on the same `redis://` and `rediss://` schemes, though neither is officially supported yet; use a recent release of whichever you pick.
 - Examples:
   - `redis://localhost:6379/0`
   - `rediss://:password@localhost:6379/0` *(with password and TLS)*
