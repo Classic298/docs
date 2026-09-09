@@ -49,17 +49,17 @@ docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway -v open-
     <tr>
       <td><code>:dev</code></td>
       <td>You want the newest fixes now.</td>
-      <td>The pre-release, in practice a nightly: rebuilt from the <code>dev</code> branch as changes land, and shipped as the next release unchanged. Give it <strong>its own volume and container name</strong> (<code>-v open-webui-dev:/app/backend/data --name open-webui-dev -p 3001:8080</code>) and keep <code>:main</code> running beside it. <Link to="/getting-started/quick-start/docker-images#using-the-dev-branch">Using the Dev Branch</Link></td>
+      <td>The pre-release, in practice a nightly: rebuilt from the <code>dev</code> branch as changes land, and shipped as the next release unchanged. Give it <strong>its own volume and container name</strong> (<code>-v open-webui-dev:/app/backend/data --name open-webui-dev -p 3001:8080</code>) and keep <code>:main</code> running beside it. <Link to="/getting-started/quick-start/install-methods/docker-images#using-the-dev-branch">Using the Dev Branch</Link></td>
     </tr>
     <tr>
       <td><code>:main-slim</code></td>
       <td>You want a small install, few dependencies, or Open WebUI as a front end only.</td>
-      <td>Ships no embedding, speech or reranking models and none of the heavy Python packages behind them, and keeps one option per job: SQLite or PostgreSQL for data, pgvector for retrieval, local file storage. Chatting with a hosted model works the same as on <code>:main</code> and needs nothing extra; documents, voice and retrieval run on services you configure. <Link to="/getting-started/quick-start/docker-images#what-slim-leaves-out">What slim leaves out</Link></td>
+      <td>Ships no embedding, speech or reranking models and none of the heavy Python packages behind them, and keeps one option per job: SQLite or PostgreSQL for data, pgvector for retrieval, local file storage. Chatting with a hosted model works the same as on <code>:main</code> and needs nothing extra; documents, voice and retrieval run on services you configure. <Link to="/getting-started/quick-start/install-methods/docker-images#what-slim-leaves-out">What slim leaves out</Link></td>
     </tr>
   </tbody>
 </table>
 
-Both combine as `:dev-slim`. GPU (`:cuda`), bundled Ollama (`:ollama`), pinned versions and Docker Hub: [Docker images and tags](/getting-started/quick-start/docker-images).
+Both combine as `:dev-slim`. GPU (`:cuda`), bundled Ollama (`:ollama`), pinned versions and Docker Hub: [Docker images and tags](/getting-started/quick-start/install-methods/docker-images).
 :::
 
   </TabItem>
@@ -85,12 +85,12 @@ volumes:
   open-webui:
 ```
 
-The tags are the same as on the Docker tab: change the `image:` line. To try `:dev`, add it as a second service with its own volume and port, see [Running the pre-release image](/getting-started/quick-start/docker-images#running-the-pre-release-image). Use Docker Compose v2 (`docker compose`, with a space).
+The tags are the same as on the Docker tab: change the `image:` line. To try `:dev`, add it as a second service with its own volume and port, see [Running the pre-release image](/getting-started/quick-start/install-methods/docker-images#running-the-pre-release-image). Use Docker Compose v2 (`docker compose`, with a space).
 
   </TabItem>
   <TabItem value="python" label="Python (pip)">
 
-Prefer `uv`, Conda or `venv`? Those live on [Python environments](/getting-started/quick-start/python-environments). Plain pip:
+Prefer `uv`, Conda or `venv`? Those live on [Python environments](/getting-started/quick-start/install-methods/python-environments). Plain pip:
 
 <PythonCompat />
 
@@ -183,4 +183,4 @@ Want an autonomous agent with terminal, file and web access? [Connect an Agent](
 
 ## More install methods
 
-Podman, Docker on Windows with WSL, the Docker Desktop extension, Pinokio and the uv, Conda and venv setups each have their own page in this section. Kubernetes, Docker Swarm and the managed cloud platforms are in [Deploying Open WebUI](/deployment/). The full image and tag reference, including GPU, bundled Ollama, pinned versions and uninstall, is [Docker images and tags](/getting-started/quick-start/docker-images).
+Podman, Docker on Windows with WSL, the Docker Desktop extension, Pinokio and the uv, Conda and venv setups each have their own page in this section. Kubernetes, Docker Swarm and the managed cloud platforms are in [Deploying Open WebUI](/deployment/). The full image and tag reference, including GPU, bundled Ollama, pinned versions and uninstall, is [Docker images and tags](/getting-started/quick-start/install-methods/docker-images).
