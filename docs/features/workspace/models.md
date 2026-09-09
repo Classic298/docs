@@ -71,7 +71,7 @@ Click **Create** in the **Workspace** header while the **Models** tab is selecte
 | Field | Description |
 | :--- | :--- |
 | **Avatar** | Upload a custom image. Animated GIF and WebP are supported |
-| **Name and ID** | Display name and unique identifier |
+| **Name and ID** | Display name and unique identifier. An ID holds no spaces or tabs and is at most 256 characters |
 | **Base Model** | The actual model that powers this agent |
 | **Description** | Short summary shown in the model selector |
 | **Tags** | Organize models in the dropdown |
@@ -79,6 +79,14 @@ Click **Create** in the **Workspace** header while the **Models** tab is selecte
 | **Language** | The globe selector beside the name switches the editor to a translation of the name, description and prompt suggestions. See [Translations](#translations) |
 
 ![The model editor with base model, description and system prompt](/images/workspace/model-editor.png)
+
+:::warning A model saved with a space in its ID
+
+IDs with whitespace are refused now, in the editor, on the API and on import, where such a model is skipped rather than created.
+
+A model already stored with a space in its ID keeps answering requests, but saving it or changing its access grants fails, because both go through the same check. Recreate it under an ID without whitespace and delete the old one.
+
+:::
 
 ### System prompt and variables
 
