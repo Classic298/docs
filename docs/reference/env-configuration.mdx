@@ -2106,8 +2106,13 @@ The four **user-info** headers are forwarded to nearly every outbound backend. T
 | `X-OpenWebUI-User-Name`, `X-OpenWebUI-User-Id`, `X-OpenWebUI-User-Email`, `X-OpenWebUI-User-Role` | OpenAI, Ollama and Anthropic model connections, tool servers (OpenAPI and MCP), plus external embedding, reranking, web-search, audio, image and document-loader services (including Mistral OCR) |
 | `X-OpenWebUI-Chat-Id` | OpenAI and Ollama model connections, and tool servers (not Anthropic) |
 | `X-OpenWebUI-Message-Id` | Tool servers only (OpenAPI and MCP) |
+| `X-OpenWebUI-Auth-Type` | OpenAI and Ollama model connections only, on model listing and chat requests |
 
 So an OpenAI, Ollama or Pipelines request receives **five** of the six headers (the four user headers plus `X-OpenWebUI-Chat-Id`); only `X-OpenWebUI-Message-Id` is tool-server-specific, since it is what powers [external tool event emitting](/features/extensibility/plugin/development/events#-external-tool-events).
+
+`X-OpenWebUI-Auth-Type` says how the caller authenticated to Open WebUI: `jwt` for a browser session, `api_key` for a request made with an API key. An upstream can use it to treat automation differently from a person at the keyboard, refusing a key-driven request to an expensive model, for example. Rename it with [`FORWARD_USER_INFO_HEADER_AUTH_TYPE`](#forward_user_info_header_auth_type).
+
+It rides along on OpenAI and Ollama connections only. Tool servers, the RAG and document-extraction backends, web search, audio and image services do not receive it, so do not build an authorization rule on its absence.
 
 If you set `FORWARD_USER_INFO_HEADER_JWT_SECRET`, the four `X-OpenWebUI-User-*` headers are replaced by a single signed JWT (see [`FORWARD_USER_INFO_HEADER_JWT_SECRET`](#forward_user_info_header_jwt_secret) below).
 
@@ -2130,6 +2135,12 @@ To forward **arbitrary custom headers**, including per-request values such as th
 - Type: `str`
 - Default: `X-OpenWebUI-User-Email`
 - Description: Customizes the header name used to forward the user's email address.
+
+#### `FORWARD_USER_INFO_HEADER_AUTH_TYPE`
+
+- Type: `str`
+- Default: `X-OpenWebUI-Auth-Type`
+- Description: Renames the header carrying how the caller authenticated, `jwt` for a browser session or `api_key` for an API key. Only sent on OpenAI and Ollama connections, and only when `ENABLE_FORWARD_USER_INFO_HEADERS` is on.
 
 #### `FORWARD_USER_INFO_HEADER_USER_ROLE`
 
@@ -2210,6 +2221,7 @@ Available placeholders, substituted at request time (any placeholder that has no
 | `{{USER_NAME}}` | Signed-in user's display name |
 | `{{USER_EMAIL}}` | Signed-in user's email |
 | `{{USER_ROLE}}` | Signed-in user's role |
+| `{{AUTH_TYPE}}` | How the caller authenticated: `jwt` for a browser session, `api_key` for an API key |
 | `{{USER_GROUPS}}` | Comma-separated names of the groups the user belongs to |
 | `{{USER_GROUP_IDS}}` | Comma-separated IDs of the same groups |
 | `{{USER_AGENT}}` | User-Agent of the originating browser request |
