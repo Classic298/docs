@@ -7375,55 +7375,55 @@ For API Key creation (and the API keys themselves):
 
 ### Sharing (Private)
 
-These settings control whether users can share workspace items with other users **privately** (non-public sharing).
+These settings control whether the **Access Control** panel shows its access list, where users add specific people and groups to an item. Which grants the server accepts is set by [`USER_PERMISSIONS_ACCESS_GRANTS_ALLOW_USERS`](#user_permissions_access_grants_allow_users), [`USER_PERMISSIONS_ACCESS_GRANTS_ALLOW_GROUPS`](#user_permissions_access_grants_allow_groups) and the public sharing settings below.
 
 #### `USER_PERMISSIONS_WORKSPACE_MODELS_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of workspace models.
+- Description: Shows the access list in the **Access Control** panel of workspace models.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `USER_PERMISSIONS_WORKSPACE_KNOWLEDGE_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of workspace knowledge.
+- Description: Shows the access list in the **Access Control** panel of workspace knowledge.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `USER_PERMISSIONS_WORKSPACE_PROMPTS_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of workspace prompts.
+- Description: Shows the access list in the **Access Control** panel of workspace prompts.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `USER_PERMISSIONS_WORKSPACE_TOOLS_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of workspace tools.
+- Description: Shows the access list in the **Access Control** panel of workspace tools.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `USER_PERMISSIONS_WORKSPACE_SKILLS_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of workspace skills.
+- Description: Shows the access list in the **Access Control** panel of workspace skills.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `USER_PERMISSIONS_NOTES_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of notes. Parent of [`USER_PERMISSIONS_NOTES_ALLOW_PUBLIC_SHARING`](#user_permissions_notes_allow_public_sharing).
+- Description: Shows the access list in the **Access Control** panel of notes. Parent of [`USER_PERMISSIONS_NOTES_ALLOW_PUBLIC_SHARING`](#user_permissions_notes_allow_public_sharing).
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 #### `USER_PERMISSIONS_FOLDERS_ALLOW_SHARING`
 
 - Type: `bool`
 - Default: `False`
-- Description: Enables or disables **private sharing** of chat folders with specific users or groups.
+- Description: Shows the access list in the **Share** dialog of chat folders, where users add specific users or groups.
 - Persistence: This environment variable is a `ConfigVar` variable.
 
 ### Sharing (Public)
